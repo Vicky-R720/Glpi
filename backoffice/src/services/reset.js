@@ -30,7 +30,7 @@ const dependencyOrder = [
 const SESSION_TOKEN = "U3Z3ZXhEbTZrVHJ1WjdBOXdRZHFudVd0bCtTbDlGdVBMclhHd3k5ejdKejN1QUEvSlRmUnZrMDJVTTA3SnhOaXVKOHRxRi9na0xMcmd1S3Z1a08zRCt5OQ==";
 
 export async function fetchEntityIds(entity) {
-  const url = `${buildUrl(entity)}?only_id=true&range=0-9999`;
+  const url = `${buildUrl(entity)}/?only_id=true&range=0-9999`;
   const response = await fetch(url, {
     method: "GET",
     headers: {

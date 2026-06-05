@@ -21,7 +21,10 @@ function App() {
     try {
       // Fetch Computers
       const resComp = await fetch('/api/Computer/?range=0-100', {
-        headers: { "Session-Token": SESSION_TOKEN }
+        headers: { 
+          "Content-Type": "application/json",
+          "Session-Token": SESSION_TOKEN 
+        }
       });
       if (resComp.ok) {
         const data = await resComp.json();
@@ -30,7 +33,10 @@ function App() {
 
       // Fetch Monitors
       const resMon = await fetch('/api/Monitor/?range=0-100', {
-        headers: { "Session-Token": SESSION_TOKEN }
+        headers: { 
+          "Content-Type": "application/json",
+          "Session-Token": SESSION_TOKEN 
+        }
       });
       if (resMon.ok) {
         const data = await resMon.json();
@@ -39,7 +45,10 @@ function App() {
 
       // Fetch Tickets
       const resTick = await fetch('/api/Ticket/?range=0-100', {
-        headers: { "Session-Token": SESSION_TOKEN }
+        headers: { 
+          "Content-Type": "application/json",
+          "Session-Token": SESSION_TOKEN 
+        }
       });
       if (resTick.ok) {
         const data = await resTick.json();
