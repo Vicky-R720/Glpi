@@ -1,0 +1,36 @@
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  padding: 16px 0;
+}
+
+.site-header .container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: #1f1b16;
+  font-size: 1.25rem;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.main-content {
+  padding: 32px 0;
+}
+
+.site-footer {
+  border-top: 1px solid #eee;
+  padding: 24px 0;
+  text-align: center;
+  color: #888;
+  margin-top: 48px;
+}
