@@ -6,10 +6,10 @@ import {
   Outlet,
   useLocation,
 } from 'react-router-dom'
-import Accueil from './components/Accueil.jsx'
-import Reset from './components/configuration/Reset.jsx'
-import LoginPage from './context/LoginContext.jsx'
-import { AuthProvider, useAuth } from './context/AuthContext.jsx'
+import Accueil from './page/Accueil.jsx'
+import Reset from './page/Reset.jsx'
+import LoginPage from './page/LoginPage.jsx'
+import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 
 function RequireAuth() {
   const { isAuthenticated } = useAuth()
