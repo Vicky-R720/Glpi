@@ -28,6 +28,7 @@ const dependencyOrder = [
 ];
 
 const SESSION_TOKEN = "U3Z3ZXhEbTZrVHJ1WjdBOXdRZHFudVd0bCtTbDlGdVBMclhHd3k5ejdKejN1QUEvSlRmUnZrMDJVTTA3SnhOaXVKOHRxRi9na0xMcmd1S3Z1a08zRCt5OQ==";
+const APP_TOKEN = "nD6HHnC4nR9eXSmsevemD8hyA7gAhgVhcuQSPiJh";
 
 export async function fetchEntityIds(entity) {
   const url = `${buildUrl(entity)}/?only_id=true&range=0-9999`;
@@ -36,6 +37,7 @@ export async function fetchEntityIds(entity) {
     headers: {
       "Content-Type": "application/json",
       "Session-Token": SESSION_TOKEN,
+      "App-Token": APP_TOKEN,
     },
   });
 
@@ -64,6 +66,7 @@ export async function resetEntity(entity) {
     headers: {
       "Content-Type": "application/json",
       "Session-Token": SESSION_TOKEN,
+      "App-Token": APP_TOKEN,
     },
     body: JSON.stringify({
       input: ids.map((id) => ({ id })),

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
+//tsiory
 const SESSION_TOKEN = "U3Z3ZXhEbTZrVHJ1WjdBOXdRZHFudVd0bCtTbDlGdVBMclhHd3k5ejdKejN1QUEvSlRmUnZrMDJVTTA3SnhOaXVKOHRxRi9na0xMcmd1S3Z1a08zRCt5OQ==";
+const APP_TOKEN = "nD6HHnC4nR9eXSmsevemD8hyA7gAhgVhcuQSPiJh";
 
 function App() {
   const [activeTab, setActiveTab] = useState('inventory');
@@ -23,7 +25,8 @@ function App() {
       const resComp = await fetch('/api/Computer/?range=0-100', {
         headers: { 
           "Content-Type": "application/json",
-          "Session-Token": SESSION_TOKEN 
+          "Session-Token": SESSION_TOKEN,
+          "App-Token": APP_TOKEN
         }
       });
       if (resComp.ok) {
@@ -35,7 +38,8 @@ function App() {
       const resMon = await fetch('/api/Monitor/?range=0-100', {
         headers: { 
           "Content-Type": "application/json",
-          "Session-Token": SESSION_TOKEN 
+          "Session-Token": SESSION_TOKEN,
+          "App-Token": APP_TOKEN
         }
       });
       if (resMon.ok) {
@@ -47,7 +51,8 @@ function App() {
       const resTick = await fetch('/api/Ticket/?range=0-100', {
         headers: { 
           "Content-Type": "application/json",
-          "Session-Token": SESSION_TOKEN 
+          "Session-Token": SESSION_TOKEN,
+          "App-Token": APP_TOKEN
         }
       });
       if (resTick.ok) {
@@ -76,7 +81,8 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Session-Token': SESSION_TOKEN
+          'Session-Token': SESSION_TOKEN,
+          'App-Token': APP_TOKEN
         },
         body: JSON.stringify({
           input: {
