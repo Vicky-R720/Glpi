@@ -1,4 +1,4 @@
-import { buildUrl } from "./config/api.js";
+import { buildUrl } from "./api.js";
 
 export const RESET_ENTITIES = [
   { key: "Ticket", label: "Tickets (Ticket)" },

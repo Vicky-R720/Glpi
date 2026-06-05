@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 //tsiory
-const SESSION_TOKEN = "U3Z3ZXhEbTZrVHJ1WjdBOXdRZHFudVd0bCtTbDlGdVBMclhHd3k5ejdKejN1QUEvSlRmUnZrMDJVTTA3SnhOaXVKOHRxRi9na0xMcmd1S3Z1a08zRCt5OQ==";
-const APP_TOKEN = "nD6HHnC4nR9eXSmsevemD8hyA7gAhgVhcuQSPiJh";
+const SESSION_TOKEN = import.meta.env.VITE_SESSION_TOKEN;
+const APP_TOKEN = import.meta.env.VITE_APP_TOKEN;
 
 function App() {
   const [activeTab, setActiveTab] = useState('inventory');
