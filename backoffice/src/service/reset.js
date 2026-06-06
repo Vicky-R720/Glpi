@@ -17,9 +17,8 @@ export const RESET_ENTITIES = [
   { key: "Cartridge", label: "Cartouches (Cartridge)" },
   { key: "Rack", label: "Racks / Baies (Rack)" },
   { key: "Pdu", label: "PDUs (Pdu)" },
-  { key: "PassiveDCObject", label: "Objets DC Passifs (PassiveDCObject)" },
+  { key: "PassiveDCEquipment", label: "Équipements DC Passifs (PassiveDCEquipment)" },
   { key: "Enclosure", label: "Châssis (Enclosure)" },
-  { key: "UninterruptiblePowerSupply", label: "Ondulateurs (UninterruptiblePowerSupply)" },
 
   // Modèles correspondants aux équipements (pour nettoyage propre)
   { key: "ComputerModel", label: "Modèles d'Ordinateur (ComputerModel)" },
@@ -31,7 +30,7 @@ export const RESET_ENTITIES = [
   { key: "RackModel", label: "Modèles de Rack (RackModel)" },
   { key: "PduModel", label: "Modèles de Pdu (PduModel)" },
   { key: "EnclosureModel", label: "Modèles de Châssis (EnclosureModel)" },
-  { key: "UninterruptiblePowerSupplyModel", label: "Modèles d'Ondulateur (UninterruptiblePowerSupplyModel)" },
+  { key: "PassiveDCEquipmentModel", label: "Modèles d'Équipement DC Passif (PassiveDCEquipmentModel)" },
 
   // Métadonnées & Configuration
   { key: "Location", label: "Lieux (Location)" },
@@ -57,9 +56,8 @@ const dependencyOrder = [
   "Cartridge",
   "Rack",
   "Pdu",
-  "PassiveDCObject",
+  "PassiveDCEquipment",
   "Enclosure",
-  "UninterruptiblePowerSupply",
 
   // Suppression des modèles associés
   "ComputerModel",
@@ -71,7 +69,7 @@ const dependencyOrder = [
   "RackModel",
   "PduModel",
   "EnclosureModel",
-  "UninterruptiblePowerSupplyModel",
+  "PassiveDCEquipmentModel",
 
   // Suppression des tables parentes globales
   "Location",

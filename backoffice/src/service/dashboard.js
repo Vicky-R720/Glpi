@@ -23,9 +23,8 @@ const INVENTORY_ASSETS = [
   "Cartridge",
   "Rack",
   "Pdu",
-  "PassiveDCObject",
-  "Enclosure",
-  "UninterruptiblePowerSupply"
+  "PassiveDCEquipment",
+  "Enclosure"
 ];
 
 /**
