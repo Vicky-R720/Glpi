@@ -11,8 +11,8 @@ export default defineConfig({
         // target: 'http://glpi.local',
 
         //vicky
-        target: 'http://localhost/glpi/public',
-
+        //target: 'http://localhost/glpi/public',
+        target: 'http://glpi.local',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/apirest.php'),

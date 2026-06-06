@@ -1,16 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
+/* ===== GLPI ITSM Design System ===== */
 :root {
-  color-scheme: light;
-  font-family: 'Outfit', sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #1f1b16;
-  background: #f7f2e8;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Primary GLPI Blue palette */
+  --glpi-primary: #2a5f9e;
+  --glpi-primary-dark: #1e4a7a;
+  --glpi-primary-light: #3b7dcc;
+  --glpi-primary-50: #eef4fb;
+  --glpi-primary-100: #d4e4f5;
+
+  /* Grays – dense professional ITSM look */
+  --glpi-gray-50: #f8f9fa;
+  --glpi-gray-100: #f1f3f5;
+  --glpi-gray-200: #e9ecef;
+  --glpi-gray-300: #dee2e6;
+  --glpi-gray-400: #ced4da;
+  --glpi-gray-500: #adb5bd;
+  --glpi-gray-600: #6c757d;
+  --glpi-gray-700: #495057;
+  --glpi-gray-800: #343a40;
+  --glpi-gray-900: #212529;
+
+  /* Status colors */
+  --status-active: #28a745;
+  --status-warning: #f0ad4e;
+  --status-danger: #dc3545;
+  --status-info: #17a2b8;
+
+  /* Urgency */
+  --urgency-low: #28a745;
+  --urgency-medium: #f0ad4e;
+  --urgency-high: #dc3545;
+
+  /* Surfaces */
+  --surface-body: #eef1f5;
+  --surface-card: #ffffff;
+  --surface-header: #2a5f9e;
+  --surface-sidebar: #1e3a5f;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 * {
@@ -20,18 +52,154 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #f0f7f4 0%, #e8f1f7 50%, #d8e5ee 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--glpi-gray-800);
+  background: var(--surface-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
+h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: var(--glpi-gray-900);
+}
+
+/* ===== Scrollbar styling ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--glpi-gray-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glpi-gray-400);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--glpi-gray-500);
+}
+
+/* ===== Toast notification ===== */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 14px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 400px;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #dc3545, #e74c6f);
+}
+
+.toast-exit {
+  animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toastSlideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(120%); opacity: 0; }
+}
+
+/* ===== Spinner ===== */
+.glpi-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--glpi-gray-200);
+  border-top: 3px solid var(--glpi-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Badge ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ===== Data Table GLPI ===== */
+.glpi-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.glpi-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.glpi-table thead th {
+  background: var(--glpi-gray-100);
+  color: var(--glpi-gray-700);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--glpi-gray-300);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.glpi-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.glpi-table tbody tr:hover {
+  background-color: var(--glpi-primary-50);
+}
+
+.glpi-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--glpi-gray-200);
+  color: var(--glpi-gray-800);
+}
+
+.glpi-table tbody tr:last-child td {
+  border-bottom: none;
 }
