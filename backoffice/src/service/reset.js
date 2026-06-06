@@ -1,6 +1,7 @@
 import { buildUrl } from "./api.js";
 
 export const RESET_ENTITIES = [
+  { key: "TicketCost", label: "Coûts des Tickets (TicketCost)" },
   { key: "Ticket", label: "Tickets (Ticket)" },
   { key: "Computer", label: "Ordinateurs (Computer)" },
   { key: "Monitor", label: "Écrans / Moniteurs (Monitor)" },
@@ -16,6 +17,7 @@ export const RESET_ENTITIES = [
 // Dependent items (like Tickets, Computers, Monitors) must be deleted before
 // their master entities (like Locations, States, Models, Manufacturers, Users).
 const dependencyOrder = [
+  "TicketCost",
   "Ticket",
   "Computer",
   "Monitor",

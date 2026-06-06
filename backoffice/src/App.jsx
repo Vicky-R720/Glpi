@@ -9,6 +9,7 @@ import {
 import Accueil from './page/Accueil.jsx'
 import Reset from './page/Reset.jsx'
 import LoginPage from './page/LoginPage.jsx'
+import ImportPage from './page/ImportPage.jsx'
 import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 
 function RequireAuth() {
@@ -30,6 +31,7 @@ export function RootRouter() {
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Navigate to="/accueil" replace />} />
             <Route path="/accueil" element={<Accueil />} />
+            <Route path="/import" element={<ImportPage />} />
             <Route path="/reset" element={<Reset />} />
             {/* Redirect other views to dashboard or reset */}
             <Route path="/computers" element={<Navigate to="/accueil" replace />} />
