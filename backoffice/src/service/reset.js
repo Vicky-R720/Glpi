@@ -42,6 +42,7 @@ export const RESET_ENTITIES = [
 
 // Ordre strict de suppression (satisfaire les clés étrangères)
 const dependencyOrder = [
+  "TicketCost",
   "Ticket",
   
   // Suppression des équipements d'abord (qui référencent des modèles/lieux/fabricants)
