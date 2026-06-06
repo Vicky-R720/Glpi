@@ -1,28 +1,79 @@
 import { buildUrl } from "./api.js";
 
+// Liste complète des entités disponibles pour réinitialisation
 export const RESET_ENTITIES = [
-  { key: "TicketCost", label: "Coûts des Tickets (TicketCost)" },
-  { key: "Ticket", label: "Tickets (Ticket)" },
+  // ITIL
+  { key: "Ticket", label: "Tickets & Incidents (Ticket)" },
+  
+  // Éléments physiques et logiciels (Assets)
   { key: "Computer", label: "Ordinateurs (Computer)" },
-  { key: "Monitor", label: "Écrans / Moniteurs (Monitor)" },
+  { key: "Monitor", label: "Écrans & Moniteurs (Monitor)" },
+  { key: "NetworkEquipment", label: "Matériels Réseau (NetworkEquipment)" },
+  { key: "Peripheral", label: "Périphériques (Peripheral)" },
+  { key: "Phone", label: "Téléphones (Phone)" },
+  { key: "Printer", label: "Imprimantes (Printer)" },
+  { key: "Software", label: "Logiciels (Software)" },
+  { key: "Consumable", label: "Consommables (Consumable)" },
+  { key: "Cartridge", label: "Cartouches (Cartridge)" },
+  { key: "Rack", label: "Racks / Baies (Rack)" },
+  { key: "Pdu", label: "PDUs (Pdu)" },
+  { key: "PassiveDCObject", label: "Objets DC Passifs (PassiveDCObject)" },
+  { key: "Enclosure", label: "Châssis (Enclosure)" },
+  { key: "UninterruptiblePowerSupply", label: "Ondulateurs (UninterruptiblePowerSupply)" },
+
+  // Modèles correspondants aux équipements (pour nettoyage propre)
+  { key: "ComputerModel", label: "Modèles d'Ordinateur (ComputerModel)" },
+  { key: "MonitorModel", label: "Modèles d'Écran (MonitorModel)" },
+  { key: "NetworkEquipmentModel", label: "Modèles Matériels Réseau (NetworkEquipmentModel)" },
+  { key: "PeripheralModel", label: "Modèles de Périphérique (PeripheralModel)" },
+  { key: "PhoneModel", label: "Modèles de Téléphone (PhoneModel)" },
+  { key: "PrinterModel", label: "Modèles d'Imprimante (PrinterModel)" },
+  { key: "RackModel", label: "Modèles de Rack (RackModel)" },
+  { key: "PduModel", label: "Modèles de Pdu (PduModel)" },
+  { key: "EnclosureModel", label: "Modèles de Châssis (EnclosureModel)" },
+  { key: "UninterruptiblePowerSupplyModel", label: "Modèles d'Ondulateur (UninterruptiblePowerSupplyModel)" },
+
+  // Métadonnées & Configuration
   { key: "Location", label: "Lieux (Location)" },
   { key: "Manufacturer", label: "Fabricants (Manufacturer)" },
   { key: "State", label: "Statuts / États (State)" },
   { key: "User", label: "Utilisateurs (User)" },
-  { key: "ComputerModel", label: "Modèles d'Ordinateur (ComputerModel)" },
-  { key: "MonitorModel", label: "Modèles d'Écran (MonitorModel)" },
 ];
 
-// Deletion order to satisfy foreign key constraints:
-// Dependent items (like Tickets, Computers, Monitors) must be deleted before
-// their master entities (like Locations, States, Models, Manufacturers, Users).
+// Ordre strict de suppression (satisfaire les clés étrangères)
 const dependencyOrder = [
   "TicketCost",
   "Ticket",
+  
+  // Suppression des équipements d'abord (qui référencent des modèles/lieux/fabricants)
   "Computer",
   "Monitor",
+  "NetworkEquipment",
+  "Peripheral",
+  "Phone",
+  "Printer",
+  "Software",
+  "Consumable",
+  "Cartridge",
+  "Rack",
+  "Pdu",
+  "PassiveDCObject",
+  "Enclosure",
+  "UninterruptiblePowerSupply",
+
+  // Suppression des modèles associés
   "ComputerModel",
   "MonitorModel",
+  "NetworkEquipmentModel",
+  "PeripheralModel",
+  "PhoneModel",
+  "PrinterModel",
+  "RackModel",
+  "PduModel",
+  "EnclosureModel",
+  "UninterruptiblePowerSupplyModel",
+
+  // Suppression des tables parentes globales
   "Location",
   "State",
   "Manufacturer",

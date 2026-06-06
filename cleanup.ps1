@@ -10,7 +10,10 @@ $backofficePaths = @(
     "$backofficeSrc/context",
     "$backofficeSrc/components/configuration",
     "$backofficeSrc/components/layout",
-    "$backofficeSrc/components/Accueil.jsx"
+    "$backofficeSrc/components/Accueil.jsx",
+    "$backofficeSrc/page/Accueil.jsx",
+    "$backofficeSrc/page/Dashbord.jsx",
+    "$backofficeSrc/service/dashbord.js"
 )
 
 foreach ($path in $backofficePaths) {
