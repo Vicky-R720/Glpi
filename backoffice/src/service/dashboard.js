@@ -35,7 +35,7 @@ export async function getEntityCount(entity) {
   const response = await fetch(url, { method: "GET", headers: HEADERS });
   
   if (!response.ok) {
-    if (response.status === 404) return 0;
+    if (response.status === 404 || response.status === 400) return 0;
     throw new Error(`Erreur de comptage sur ${entity}`);
   }
 
@@ -57,7 +57,7 @@ export async function getTicketsData() {
   const response = await fetch(url, { method: "GET", headers: HEADERS });
 
   if (!response.ok) {
-    if (response.status === 404) return [];
+    if (response.status === 404 || response.status === 400) return [];
     throw new Error("Erreur lors de la récupération des tickets");
   }
 

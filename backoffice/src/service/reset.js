@@ -93,7 +93,7 @@ export async function fetchEntityIds(entity) {
   });
 
   if (!response.ok) {
-    if (response.status === 404) return [];
+    if (response.status === 404 || response.status === 400) return [];
     throw new Error(`HTTP ${response.status} - ${response.statusText}`);
   }
 
