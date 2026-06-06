@@ -6,9 +6,10 @@ import {
   Outlet,
   useLocation,
 } from 'react-router-dom'
-import Accueil from './page/Accueil.jsx'
+import Dashboard from './page/Dashboard.jsx'
 import Reset from './page/Reset.jsx'
 import LoginPage from './page/LoginPage.jsx'
+import Tickets from './page/Tickets.jsx'
 import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 
 function RequireAuth() {
@@ -29,13 +30,15 @@ export function RootRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Navigate to="/accueil" replace />} />
-            <Route path="/accueil" element={<Accueil />} />
+            
             <Route path="/reset" element={<Reset />} />
             {/* Redirect other views to dashboard or reset */}
             <Route path="/computers" element={<Navigate to="/accueil" replace />} />
             <Route path="/monitors" element={<Navigate to="/accueil" replace />} />
-            <Route path="/tickets" element={<Navigate to="/accueil" replace />} />
+            <Route path="/tickets" element={<Tickets />} />
             <Route path="*" element={<Navigate to="/accueil" replace />} />
+            <Route path="/accueil" element={<Dashboard />} />
+
           </Route>
         </Routes>
       </AuthProvider>
