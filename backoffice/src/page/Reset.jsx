@@ -91,7 +91,7 @@ function Reset() {
           </div>
           <div className="d-flex align-items-center gap-3">
             <span className="badge bg-light text-dark border p-2">
-              🔗 http://glpi.local/apirest.php/
+              🔗 {import.meta.env.VITE_API_BASE || '/api'}
             </span>
             <button
               className="btn btn-danger d-flex align-items-center gap-2"

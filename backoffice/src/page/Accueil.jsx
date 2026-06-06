@@ -129,7 +129,7 @@ function Accueil() {
             <div className="d-flex align-items-center gap-3">
               <div className="bg-success rounded-circle" style={{ width: '12px', height: '12px' }}></div>
               <div>
-                <span className="fw-bold text-dark">URL GLPI:</span> <code className="mx-2">http://glpi.local/apirest.php/</code>
+                <span className="fw-bold text-dark">URL GLPI:</span> <code className="mx-2">{import.meta.env.VITE_API_BASE || '/api'}</code>
               </div>
             </div>
             <div className="mt-3 text-muted small">
