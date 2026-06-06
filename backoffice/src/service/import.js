@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost/glpi/public/apirest.php';
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 const getHeaders = () => {
   return {
