@@ -297,15 +297,17 @@ function Tickets() {
                               <th>Temps passé</th>
                               <th>Coût horaire</th>
                               <th>Coût fixe</th>
+                              <th>Coût matériel</th>
                             </tr>
                           </thead>
                           <tbody className="small">
                             {ticketCosts.map((cost) => (
                               <tr key={cost.id}>
                                 <td>{cost.name || "Intervention technique"}</td>
-                                <td>{Math.round(cost.duration / 60)} minutes</td>
-                                <td>{cost.costtime} € / hr</td>
-                                <td>{cost.costfixed} €</td>
+                                <td>{cost.actiontime ? Math.round(cost.actiontime / 60) : 0} minutes</td>
+                                <td>{cost.cost_time || 0} € / hr</td>
+                                <td>{cost.cost_fixed || 0} €</td>
+                                <td>{cost.cost_material || 0} €</td>
                               </tr>
                             ))}
                           </tbody>

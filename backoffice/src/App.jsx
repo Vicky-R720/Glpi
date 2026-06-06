@@ -10,6 +10,7 @@ import Dashboard from './page/Dashboard.jsx'
 import Reset from './page/Reset.jsx'
 import LoginPage from './page/LoginPage.jsx'
 import Tickets from './page/Tickets.jsx'
+import ImportPage from './page/ImportPage.jsx'
 import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 
 function RequireAuth() {
@@ -30,7 +31,7 @@ export function RootRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Navigate to="/accueil" replace />} />
-            
+            <Route path="/import" element={<ImportPage />} />
             <Route path="/reset" element={<Reset />} />
             {/* Redirect other views to dashboard or reset */}
             <Route path="/computers" element={<Navigate to="/accueil" replace />} />
