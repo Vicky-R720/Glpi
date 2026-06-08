@@ -121,6 +121,12 @@ function ImportPage() {
     let finalResults = [];
 
     try {
+      let ticketDataRaw = null;
+      if (ticketFile) {
+        setStatus('Lecture du fichier tickets...');
+        ticketDataRaw = await parseCSVFile(ticketFile);
+      }
+
       if (equipFile) {
         setStatus('Lecture du fichier équipements...');
         const equipData = await parseCSVFile(equipFile);
@@ -136,15 +142,12 @@ function ImportPage() {
         }
       }
 
-      if (ticketFile) {
-        setStatus('Lecture du fichier tickets...');
-        const ticketData = await parseCSVFile(ticketFile);
-
-        if (ticketData.length === 0) {
+      if (ticketFile && ticketDataRaw) {
+        if (ticketDataRaw.length === 0) {
           setStatus('Le fichier tickets est vide ou mal formaté.');
         } else {
           setStatus('Début import tickets...');
-          const updatedTickets = await processTicketImport(ticketData, (msg) => {
+          const updatedTickets = await processTicketImport(ticketDataRaw, (msg) => {
             setStatus(`[Tickets] ${msg}`);
           });
           finalResults = [...finalResults, ...updatedTickets];
@@ -159,7 +162,7 @@ function ImportPage() {
           setStatus('Le fichier coûts est vide ou mal formaté.');
         } else {
           setStatus('Début import coûts...');
-          const updatedCosts = await processTicketCostImport(costData, (msg) => {
+          const updatedCosts = await processTicketCostImport(costData, ticketDataRaw, (msg) => {
             setStatus(`[Ticket Costs] ${msg}`);
           });
           finalResults = [...finalResults, ...updatedCosts];

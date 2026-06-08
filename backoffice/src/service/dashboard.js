@@ -19,12 +19,14 @@ const INVENTORY_ASSETS = [
   "Phone",
   "Printer",
   "Software",
-  "Consumable",
-  "Cartridge",
+  "ConsumableItem",     // Variantes GLPI (souvent "Consumable")
+  "CartridgeItem",      // Variantes GLPI (souvent "Cartridge")
   "Rack",
   "Pdu",
-  "PassiveDCEquipment",
-  "Enclosure"
+  "PassiveDCEquipment", // Présent dans votre liste
+  "Enclosure",
+  "Cable",
+  "PassiveDCObject"     // Important : présent dans vos erreurs de dashboard
 ];
 
 /**
