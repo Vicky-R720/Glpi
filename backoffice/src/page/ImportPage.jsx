@@ -3,12 +3,14 @@ import Papa from 'papaparse';
 import { processImport } from '../service/import';
 import { processTicketImport } from '../service/ticketImport';
 import { processTicketCostImport } from '../service/ticketCostImport';
+import { processImageImport } from '../service/importImage';
 import '../index.css';
 
 function ImportPage() {
   const [equipFile, setEquipFile] = useState(null);
   const [ticketFile, setTicketFile] = useState(null);
   const [costFile, setCostFile] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,14 @@ function ImportPage() {
       setCostFile(e.target.files[0]);
     } else {
       setCostFile(null);
+    }
+  };
+
+  const handleImageFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    } else {
+      setImageFile(null);
     }
   };
 
@@ -101,8 +111,8 @@ function ImportPage() {
   };
 
   const handleImport = async () => {
-    if (!equipFile && !ticketFile && !costFile) {
-      setStatus('Veuillez sélectionner au moins un fichier CSV.');
+    if (!equipFile && !ticketFile && !costFile && !imageFile) {
+      setStatus('Veuillez sélectionner au moins un fichier.');
       return;
     }
 
@@ -156,6 +166,13 @@ function ImportPage() {
         }
       }
 
+      if (imageFile) {
+        setStatus('Début import des images ZIP...');
+        await processImageImport(imageFile, finalResults, (msg) => {
+          setStatus(`[Images] ${msg}`);
+        });
+      }
+
       setResults(finalResults);
       setStatus('Importation globale terminée !');
     } catch (error) {
@@ -204,9 +221,20 @@ function ImportPage() {
           />
         </div>
 
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label style={{ width: '150px', fontWeight: 'bold' }}>Images (ZIP) :</label>
+          <input 
+            type="file" 
+            accept=".zip" 
+            onChange={handleImageFileChange}
+            disabled={isLoading}
+            style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', flex: 1 }}
+          />
+        </div>
+
         <button 
           onClick={handleImport} 
-          disabled={(!equipFile && !ticketFile && !costFile) || isLoading}
+          disabled={(!equipFile && !ticketFile && !costFile && !imageFile) || isLoading}
           style={{
             padding: '0.5rem 1rem',
             backgroundColor: isLoading ? '#ccc' : '#007bff',
