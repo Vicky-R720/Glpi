@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import Assets from './page/Assets.jsx'
+import DeclareTicket from './page/DeclareTicket.jsx'
 
 //tsiory
 const SESSION_TOKEN = import.meta.env.VITE_SESSION_TOKEN;
@@ -12,12 +14,7 @@ function App() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Form states
-  const [ticketTitle, setTicketTitle] = useState('');
-  const [ticketDesc, setTicketDesc] = useState('');
-  const [submitStatus, setSubmitStatus] = useState(null);
-
-  // Fetch Inventory and Tickets
+  // Fetch Inventory and Tickets (for inventory and list tabs)
   const loadData = async () => {
     setLoading(true);
     try {
@@ -70,42 +67,6 @@ function App() {
     loadData();
   }, []);
 
-  // Submit Ticket
-  const handleSubmitTicket = async (e) => {
-    e.preventDefault();
-    if (!ticketTitle.trim() || !ticketDesc.trim()) return;
-
-    setSubmitStatus({ loading: true });
-    try {
-      const res = await fetch('/api/Ticket/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Session-Token': SESSION_TOKEN,
-          'App-Token': APP_TOKEN
-        },
-        body: JSON.stringify({
-          input: {
-            name: ticketTitle,
-            content: ticketDesc
-          }
-        })
-      });
-
-      if (res.ok) {
-        setSubmitStatus({ success: true, message: 'Ticket créé avec succès !' });
-        setTicketTitle('');
-        setTicketDesc('');
-        loadData(); // reload tickets
-      } else {
-        const err = await res.text();
-        setSubmitStatus({ success: false, message: `Erreur: ${err}` });
-      }
-    } catch (e) {
-      setSubmitStatus({ success: false, message: `Erreur réseau: ${e.message}` });
-    }
-  };
-
   return (
     <div>
       <header className="site-header">
@@ -114,13 +75,25 @@ function App() {
           <div className="d-flex gap-3">
             <button 
               className={`btn btn-sm ${activeTab === 'inventory' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setActiveTab('inventory')}
+              onClick={() => {
+                setActiveTab('inventory');
+                loadData(); // refresh list
+              }}
             >
               🖥️ Mon Matériel
             </button>
             <button 
+              className={`btn btn-sm ${activeTab === 'assets' ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => setActiveTab('assets')}
+            >
+              🔍 Recherche d'Éléments
+            </button>
+            <button 
               className={`btn btn-sm ${activeTab === 'tickets' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setActiveTab('tickets')}
+              onClick={() => {
+                setActiveTab('tickets');
+                loadData(); // refresh list
+              }}
             >
               🎟️ Mes Tickets
             </button>
@@ -128,21 +101,22 @@ function App() {
               className={`btn btn-sm ${activeTab === 'new-ticket' ? 'btn-primary' : 'btn-outline-primary'}`}
               onClick={() => setActiveTab('new-ticket')}
             >
-              ➕ Déclarer un incident
+              ➕ Déclarer Incident / Demande
             </button>
           </div>
         </div>
       </header>
 
       <main className="container main-content" style={{ minHeight: '60vh' }}>
-        {loading && (
+        {loading && activeTab !== 'new-ticket' && activeTab !== 'assets' && (
           <div className="text-center py-4">
             <div className="spinner-border text-primary" role="status"></div>
             <p className="mt-2 text-muted">Chargement des informations...</p>
           </div>
         )}
 
-        {!loading && activeTab === 'inventory' && (
+        {/* Tab: Inventory */}
+        {activeTab === 'inventory' && !loading && (
           <div>
             <h2 className="h4 mb-4">Mes Équipements Enregistrés</h2>
             <div className="row g-4">
@@ -195,7 +169,8 @@ function App() {
           </div>
         )}
 
-        {!loading && activeTab === 'tickets' && (
+        {/* Tab: Tickets list */}
+        {activeTab === 'tickets' && !loading && (
           <div>
             <h2 className="h4 mb-4">Mes Demandes de Support / Incidents</h2>
             <div className="card shadow-sm border-0 p-4">
@@ -237,57 +212,14 @@ function App() {
           </div>
         )}
 
-        {!loading && activeTab === 'new-ticket' && (
-          <div className="row justify-content-center">
-            <div className="col-md-8">
-              <div className="card shadow-sm border-0 p-4">
-                <h2 className="h4 mb-3">Déclarer un Nouvel Incident</h2>
-                <p className="text-muted small mb-4">Votre ticket sera instantanément envoyé à l'équipe de support GLPI pour traitement.</p>
+        {/* Tab: Declare ticket (Advanced) */}
+        {activeTab === 'new-ticket' && (
+          <DeclareTicket />
+        )}
 
-                <form onSubmit={handleSubmitTicket}>
-                  <div className="mb-3">
-                    <label className="form-label fw-bold" htmlFor="ticketTitle">Titre de l'incident</label>
-                    <input 
-                      type="text" 
-                      id="ticketTitle"
-                      className="form-control" 
-                      placeholder="Ex: Mon écran ne s'allume plus"
-                      value={ticketTitle}
-                      onChange={(e) => setTicketTitle(e.target.value)}
-                      required 
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-bold" htmlFor="ticketDesc">Description détaillée</label>
-                    <textarea 
-                      id="ticketDesc"
-                      className="form-control" 
-                      rows="5" 
-                      placeholder="Décrivez précisément le problème rencontré (symptômes, matériel concerné)..."
-                      value={ticketDesc}
-                      onChange={(e) => setTicketDesc(e.target.value)}
-                      required
-                    ></textarea>
-                  </div>
-
-                  {submitStatus && (
-                    <div className={`alert ${submitStatus.success ? 'alert-success' : 'alert-danger'} mb-3`}>
-                      {submitStatus.message}
-                    </div>
-                  )}
-
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary w-100"
-                    disabled={submitStatus?.loading}
-                  >
-                    {submitStatus?.loading ? 'Création en cours...' : 'Envoyer le ticket d\'incident'}
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
+        {/* Tab: Assets Search */}
+        {activeTab === 'assets' && (
+          <Assets />
         )}
       </main>
 

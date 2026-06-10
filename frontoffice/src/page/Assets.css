@@ -1,0 +1,215 @@
+/* Glassmorphism filters card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08);
+}
+
+/* Page heading effects */
+.page-title {
+  background: linear-gradient(135deg, #1f2937, #4b5563);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Badges for asset type summary count list */
+.badge-interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+}
+
+.badge-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.badge-interactive.active {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+  border-color: #0d6efd;
+}
+
+/* Styled Table */
+.custom-table {
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.custom-table tbody tr {
+  background: #ffffff;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.custom-table tbody tr:hover {
+  transform: scale(1.005);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  background-color: #fcfbfa !important;
+  cursor: pointer;
+}
+
+.custom-table th {
+  font-weight: 600;
+  color: #4b5563;
+  border-bottom: 2px solid #e5e7eb !important;
+  padding: 12px 16px;
+}
+
+.custom-table td {
+  padding: 14px 16px;
+  border: none !important;
+  vertical-align: middle;
+}
+
+/* Custom Status Badges */
+.status-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  text-align: center;
+}
+
+.status-production {
+  background-color: rgba(25, 135, 84, 0.12);
+  color: #198754;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+}
+
+.status-stock {
+  background-color: rgba(13, 110, 253, 0.12);
+  color: #0d6efd;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.status-maintenance {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #b58100;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-broken {
+  background-color: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.status-default {
+  background-color: rgba(108, 117, 125, 0.12);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+/* Custom Modal Backdrop & Dialog */
+.modal-backdrop-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-dialog-custom {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header-custom {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body-custom {
+  padding: 24px;
+}
+
+.modal-footer-custom {
+  padding: 16px 24px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: flex-end;
+  background-color: #f9fafb;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+/* Details list inside modal */
+.detail-item {
+  border-bottom: 1px solid #f3f4f6;
+  padding: 10px 0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 550;
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Custom Scrollbar for Modal details list */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
