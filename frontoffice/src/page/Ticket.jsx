@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus } from "../service/ticket2.js";
+import { getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus, getKanbanColors } from "../service/ticket2.js";
 import "./Ticket.css";
 
 export default function Ticket() {
@@ -15,11 +15,36 @@ export default function Ticket() {
 
     const [draggedTicketId, setDraggedTicketId] = useState(null);
 
+    // Color states from Spring Boot SQLite DB
+    const [columnColors, setColumnColors] = useState({
+        colorNouveau: '#ffb3ba',
+        colorEnCours: '#bae1ff',
+        colorTermine: '#baffc9'
+    });
+
     const statusList = [
         { ids: [1], name: "Nouveau" },
         { ids: [2, 3], name: "En cours" },
         { ids: [5], name: "Terminé" }
     ];
+
+    useEffect(() => {
+        async function fetchColors() {
+            try {
+                const data = await getKanbanColors();
+                setColumnColors({
+                    colorNouveau: data.colorNouveau || '#ffb3ba',
+                    colorEnCours: data.colorEnCours || '#bae1ff',
+                    colorTermine: data.colorTermine || '#baffc9'
+                });
+            } catch (error) {
+                console.error("Impossible de charger les couleurs Kanban", error);
+            }
+        }
+        fetchColors();
+    }, []);
+
+
 
     useEffect(() => {
         async function loadingTickets() {
@@ -159,12 +184,20 @@ export default function Ticket() {
                     // On choisit le premier ID du statut cible (ex: si "Nouveau", l'id est 1)
                     const targetStatusId = status.ids[0];
 
+                    let columnColor = '#f8f9fa';
+                    if (targetStatusId === 1) columnColor = columnColors.colorNouveau;
+                    else if (targetStatusId === 2 || targetStatusId === 3) columnColor = columnColors.colorEnCours;
+                    else if (targetStatusId === 5) columnColor = columnColors.colorTermine;
+
                     return (
                         <div key={status.name} className="ticket-column"
+                            style={{ backgroundColor: columnColor, transition: 'background-color 0.3s' }}
                             onDragOver={handleDragOver}
                             onDrop={(e) => handleDrop(e, targetStatusId)} // On dépose sur la colonne entière
                         >
-                            <h2>{status.name} - {columnTickets.length}</h2>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                <h2 style={{ margin: 0, border: 'none', padding: 0 }}>{status.name} - {columnTickets.length}</h2>
+                            </div>
 
                             <ul>
                                 {columnTickets.map(ticket => (

@@ -61,3 +61,14 @@ export async function updateTicketStatus(ticketId, newStatusId) {
     if (!response.ok) throw new Error("Échec de la mise à jour du statut");
     return await response.json();
 }
+
+/**
+ * Récupère les couleurs du Kanban depuis l'API Spring Boot
+ */
+export async function getKanbanColors() {
+    const response = await fetch("http://localhost:8080/api/colors");
+    if (!response.ok) throw new Error("Impossible de charger les couleurs Kanban");
+    return await response.json();
+}
+
+
