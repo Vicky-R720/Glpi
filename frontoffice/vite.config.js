@@ -8,10 +8,10 @@ export default defineConfig({
     proxy: {
       '/api': {
         //tsiory
-        // target: 'http://glpi.local',
+         target: 'http://glpi.local',
 
         //vicky
-        target: 'http://localhost/glpi/public',
+        //target: 'http://localhost/glpi/public',
 
         changeOrigin: true,
         secure: false,
