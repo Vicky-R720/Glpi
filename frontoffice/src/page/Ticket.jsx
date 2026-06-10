@@ -5,7 +5,7 @@ import "./Ticket.css";
 export default function Ticket() {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
@@ -116,28 +116,33 @@ export default function Ticket() {
         <div className="ticket">
             <h1>Ticket</h1>
 
-            {statusList.map(status => (
-                <div key={status.name}>
-                    <h2>{status.name}</h2>
+            {statusList.map(status => {
+                const filtre = tickets.filter(ticket => status.ids.includes(ticket.status));
 
-                    <ul>
-                        {tickets
-                            .filter(ticket => status.ids.includes(ticket.status))
-                            .map(ticket => (
-                                <li key={ticket.id} onClick={() => handleTicketClick(ticket.id)}>
-                                    <strong>#{ticket.id}</strong> - {ticket.name}
-                                </li>
-                            ))}
-                    </ul>
+                return (
 
-                    {
-                        status.ids.includes(1) && (
-                            <a href="/new-ticket">Ajouter ticket</a>
-                        )
-                    }
+                    <div key={status.name}>
+                        <h2>{status.name} - {filtre.length}</h2>
+                        <ul>
+                            {tickets
+                                .filter(ticket => status.ids.includes(ticket.status))
+                                .map(ticket => (
+                                    <li key={ticket.id} onClick={() => handleTicketClick(ticket.id)}>
+                                        <strong>{ticket.id}</strong> - {ticket.name}
 
-                </div>
-            ))}
+                                    </li>
+                                ))}
+                        </ul>
+
+                        {
+                            status.ids.includes(1) && (
+                                <a href="/new-ticket">Ajouter ticket</a>
+                            )
+                        }
+
+                    </div>
+                )
+            })}
 
             {isModalOpen && (
                 <div className="modal-overlay" onClick={closeModal}>
