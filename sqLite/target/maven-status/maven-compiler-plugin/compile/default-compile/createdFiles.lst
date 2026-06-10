@@ -1,0 +1,4 @@
+com\glpi\color\controller\KanbanColorController.class
+com\glpi\color\KanbanColorApplication.class
+com\glpi\color\repository\KanbanColorRepository.class
+com\glpi\color\model\KanbanColor.class
