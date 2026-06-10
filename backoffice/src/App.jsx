@@ -12,6 +12,7 @@ import LoginPage from './page/LoginPage.jsx'
 import Tickets from './page/Tickets.jsx'
 import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 import ImportPage from './page/ImportPage.jsx'
+import KanbanConfig from './page/KanbanConfig.jsx'
 
 function RequireAuth() {
   const { isAuthenticated } = useAuth()
@@ -33,6 +34,7 @@ export function RootRouter() {
             <Route path="/" element={<Navigate to="/accueil" replace />} />
             <Route path="/import" element={<ImportPage />} />
             <Route path="/reset" element={<Reset />} />
+            <Route path="/kanban-config" element={<KanbanConfig />} />
             {/* Redirect other views to dashboard or reset */}
             <Route path="/computers" element={<Navigate to="/accueil" replace />} />
             <Route path="/monitors" element={<Navigate to="/accueil" replace />} />

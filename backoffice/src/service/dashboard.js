@@ -23,10 +23,8 @@ const INVENTORY_ASSETS = [
   "CartridgeItem",      // Variantes GLPI (souvent "Cartridge")
   "Rack",
   "Pdu",
-  "PassiveDCEquipment", // Présent dans votre liste
   "Enclosure",
-  "Cable",
-  "PassiveDCObject"     // Important : présent dans vos erreurs de dashboard
+  "Cable"
 ];
 
 /**
@@ -55,7 +53,7 @@ export async function getEntityCount(entity) {
  * Charge tous les tickets pour en faire l'analyse détaillée
  */
 export async function getTicketsData() {
-  const url = `${buildUrl("Ticket")}/?range=0-9999&sort=id&order=DESC`; // Tri par ID décroissant
+  const url = `${buildUrl("Ticket")}/?range=0-200&sort=id&order=DESC`; // Tri par ID décroissant
   const response = await fetch(url, { method: "GET", headers: HEADERS });
 
   if (!response.ok) {

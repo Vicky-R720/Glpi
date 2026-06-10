@@ -66,6 +66,8 @@ function Sidebar({ onLogout }) {
 
             {open.configuration && (
               <div className="nav-sublist ms-3 mt-1">
+                <a className="nav-link small" href="/import">📥 Import de données</a>
+                <a className="nav-link small" href="/kanban-config">🎨 Config Kanban</a>
                 <a className="nav-link small" href="/reset">🔄 Réinitialisation</a>
               </div>
             )}
