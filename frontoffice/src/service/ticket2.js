@@ -43,3 +43,21 @@ export async function getTicketCosts(ticketId) {
   if (!response.ok) return [];
   return await response.json();
 }
+
+// Dans frontoffice/src/service/ticket2.js
+export async function updateTicketStatus(ticketId, newStatusId) {
+    const url = `${buildUrl("Ticket")}/${ticketId}`;
+    const response = await fetch(url, {
+        method: "PUT", // ou PATCH selon la configuration de votre API
+        headers: HEADERS,
+        body: JSON.stringify({
+            input: {
+                id: ticketId,
+                status: newStatusId
+            }
+        })
+    });
+    
+    if (!response.ok) throw new Error("Échec de la mise à jour du statut");
+    return await response.json();
+}

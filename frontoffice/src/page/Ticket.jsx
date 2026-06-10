@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts } from "../service/ticket2.js";
+import { getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus } from "../service/ticket2.js";
 import "./Ticket.css";
 
 export default function Ticket() {
@@ -12,6 +12,8 @@ export default function Ticket() {
     const [linkedItems, setLinkedItems] = useState([]);
     const [ticketCosts, setTicketCosts] = useState([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
+
+    const [draggedTicketId, setDraggedTicketId] = useState(null);
 
     const statusList = [
         { ids: [1], name: "Nouveau" },
@@ -109,40 +111,85 @@ export default function Ticket() {
         }
     };
 
+    // Déclenché quand on commence à glisser un ticket
+    const handleDragStart = (e, ticketId) => {
+        setDraggedTicketId(ticketId);
+    };
+
+    // Autoriser le dépôt au dessus d'une colonne (Nécessaire pour que onDrop s'active)
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    // Déclenché quand on lâche le ticket dans une nouvelle colonne
+    const handleDrop = async (e, targetStatusId) => {
+        e.preventDefault();
+        if (!draggedTicketId) return;
+
+        // 1. Mise à jour "Optimiste" de l'interface (pour que ça soit instantané visuellement)
+        const originalTickets = [...tickets];
+        setTickets(tickets.map(ticket =>
+            ticket.id === draggedTicketId ? { ...ticket, status: targetStatusId } : ticket
+        ));
+
+        // 2. Appel à l'API en arrière plan
+        try {
+            await updateTicketStatus(draggedTicketId, targetStatusId);
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour :", error);
+            // En cas d'erreur, on annule visuellement le déplacement
+            setTickets(originalTickets);
+            alert("Impossible de changer le statut du ticket.");
+        } finally {
+            setDraggedTicketId(null);
+        }
+    };
+
+
     if (loading) {
         return <p>Chargement...</p>;
     }
     return (
         <div className="ticket">
             <h1>Ticket</h1>
+            <div className="ticket-columns">
+                {statusList.map(status => {
+                    const columnTickets = tickets.filter(ticket => status.ids.includes(ticket.status));
 
-            {statusList.map(status => {
-                const filtre = tickets.filter(ticket => status.ids.includes(ticket.status));
+                    // On choisit le premier ID du statut cible (ex: si "Nouveau", l'id est 1)
+                    const targetStatusId = status.ids[0];
 
-                return (
+                    return (
+                        <div key={status.name} className="ticket-column"
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, targetStatusId)} // On dépose sur la colonne entière
+                        >
+                            <h2>{status.name} - {columnTickets.length}</h2>
 
-                    <div key={status.name}>
-                        <h2>{status.name} - {filtre.length}</h2>
-                        <ul>
-                            {tickets
-                                .filter(ticket => status.ids.includes(ticket.status))
-                                .map(ticket => (
-                                    <li key={ticket.id} onClick={() => handleTicketClick(ticket.id)}>
-                                        <strong>{ticket.id}</strong> - {ticket.name}
-
+                            <ul>
+                                {columnTickets.map(ticket => (
+                                    <li key={ticket.id} onClick={() => handleTicketClick(ticket.id)}
+                                        draggable // Rend la ligne déplaçable
+                                        onDragStart={(e) => handleDragStart(e, ticket.id)}
+                                        style={{
+                                            cursor: 'grab', // Indique visuellement qu'on peut glisser
+                                            opacity: draggedTicketId === ticket.id ? 0.5 : 1
+                                        }}
+                                    >
+                                        <strong>#{ticket.id}</strong> - {ticket.name}
                                     </li>
                                 ))}
-                        </ul>
+                            </ul>
 
-                        {
-                            status.ids.includes(1) && (
-                                <a href="/new-ticket">Ajouter ticket</a>
-                            )
-                        }
-
-                    </div>
-                )
-            })}
+                            {
+                                status.ids.includes(1) && (
+                                    <a href="/new-ticket" style={{ display: 'block', textAlign: 'center' }}>Ajouter ticket</a>
+                                )
+                            }
+                        </div>
+                    );
+                })}
+            </div>
 
             {isModalOpen && (
                 <div className="modal-overlay" onClick={closeModal}>
