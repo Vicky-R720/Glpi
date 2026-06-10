@@ -131,7 +131,7 @@ export async function createTicketWithDetails(ticketInput, associatedAssets = []
             input: {
               tickets_id: ticketId,
               users_id: observer.id,
-              type: 2, // 2 = Observateur
+              type: 3, // 2 = Observateur
             },
           }),
         });

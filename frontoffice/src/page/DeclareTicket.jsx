@@ -154,6 +154,7 @@ export default function DeclareTicket() {
 
     // Build the ticket payload
     const ticketInput = {
+      
       name: title,
       content: description,
       type: ticketType,
