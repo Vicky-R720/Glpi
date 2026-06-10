@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useLocation,
 import './App.css'
 import Assets from './page/Assets.jsx'
 import DeclareTicket from './page/DeclareTicket.jsx'
+import Ticket from './page/Ticket.jsx'
 
 //tsiory
 const SESSION_TOKEN = import.meta.env.VITE_SESSION_TOKEN;
@@ -140,6 +141,12 @@ function AppLayout() {
             >
               ➕ Déclarer Incident / Demande
             </NavLink>
+            <NavLink 
+              to="/ticket" 
+              className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-primary'}`}
+            >
+              kaban
+            </NavLink>
           </div>
         </div>
       </header>
@@ -264,11 +271,12 @@ export default function App() {
           <Route path="/assets" element={<Assets />} />
           <Route path="/tickets" element={<TicketsView />} />
           <Route path="/new-ticket" element={<DeclareTicket />} />
-          
+
           {/* Redirect other views to inventory */}
           <Route path="/computers" element={<Navigate to="/inventory" replace />} />
           <Route path="/monitors" element={<Navigate to="/inventory" replace />} />
           <Route path="*" element={<Navigate to="/inventory" replace />} />
+          <Route path="/ticket" element={<Ticket />} />
         </Route>
       </Routes>
     </Router>
