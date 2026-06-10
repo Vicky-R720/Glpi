@@ -7,7 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://glpi.local',
+        //tsiory
+        // target: 'http://glpi.local',
+
+        //vicky
+        target: 'http://localhost/glpi/public',
+
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/apirest.php'),
