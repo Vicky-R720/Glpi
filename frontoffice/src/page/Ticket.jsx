@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus, getKanbanColors } from "../service/ticket2.js";
+import { getLang, getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus, getKanbanColors } from "../service/ticket2.js";
 import "./Ticket.css";
 
 export default function Ticket() {
@@ -12,8 +12,11 @@ export default function Ticket() {
     const [linkedItems, setLinkedItems] = useState([]);
     const [ticketCosts, setTicketCosts] = useState([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    // On initialise la langue par défaut à "fr"
+    const [currentLang, setCurrentLang] = useState("fr");
 
     const [draggedTicketId, setDraggedTicketId] = useState(null);
+    const [lang, setLang] = useState([]);
 
     // Color states from Spring Boot SQLite DB
     const [columnColors, setColumnColors] = useState({
@@ -22,11 +25,33 @@ export default function Ticket() {
         colorTermine: '#baffc9'
     });
 
-    const statusList = [
-        { ids: [1], name: "Nouveau" },
-        { ids: [2, 3], name: "En cours" },
-        { ids: [5], name: "Terminé" }
-    ];
+
+
+    useEffect(() => {
+        async function fetchLang() {
+            try {
+                const data = await getLang(currentLang);
+                setLang(data);
+            } catch (error) {
+                console.error("Impossible de charger les lang Kanban", error);
+            }
+        }
+        fetchLang();
+    }, [currentLang]);
+
+    const statusList = [];
+
+    lang.forEach(l => {
+        try {
+            statusList.push({
+                ...l,
+                ids: JSON.parse(l.glpi_ids) // Convert string "[1]" to array [1]
+            });
+        } catch (e) {
+            console.error("Error parsing glpi_ids:", e);
+        }
+    });
+
 
     useEffect(() => {
         async function fetchColors() {
@@ -177,6 +202,15 @@ export default function Ticket() {
     return (
         <div className="ticket">
             <h1>Ticket</h1>
+            <select
+                value={currentLang}
+                onChange={(e) => setCurrentLang(e.target.value)}
+                style={{ padding: '8px', borderRadius: '5px', height: 'fit-content' }}
+            >
+                <option value="fr">Français</option>
+                <option value="mlg">Malgache</option>
+            </select>
+            
             <div className="ticket-columns">
                 {statusList.map(status => {
                     const columnTickets = tickets.filter(ticket => status.ids.includes(ticket.status));
