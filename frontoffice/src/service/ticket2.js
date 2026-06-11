@@ -71,4 +71,10 @@ export async function getKanbanColors() {
     return await response.json();
 }
 
+export async function getLang(Lang) {
+    const response = await fetch(`http://localhost:8080/api/lang?language=${Lang}`);
+    if (!response.ok) throw new Error("Impossible de charger les couleurs lang");
+    return await response.json();
+}
+
 
