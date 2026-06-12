@@ -270,7 +270,7 @@ export default function Ticket() {
                     let columnColor = '#f8f9fa';
                     if (targetStatusId === 1) columnColor = columnColors.colorNouveau;
                     else if (targetStatusId === 2 || targetStatusId === 3) columnColor = columnColors.colorEnCours;
-                    else if (targetStatusId === 5) columnColor = columnColors.colorTermine;
+                    else if (targetStatusId === 5 || targetStatusId === 6) columnColor = columnColors.colorTermine;
 
                     return (
                         <div key={status.name} className="ticket-column"
