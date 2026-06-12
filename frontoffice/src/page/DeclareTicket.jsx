@@ -73,7 +73,6 @@ export default function DeclareTicket() {
     return locationsList.length > 0 ? locationsList : [
       { id: 1, name: "Administration" },
       { id: 2, name: "Laboratoire IA" },
-      { id: 3, name: "Salle 301" },
       { id: 4, name: "Comptabilité" },
       { id: 5, name: "Magasin Informatique" }
     ];

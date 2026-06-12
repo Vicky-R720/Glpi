@@ -3,14 +3,14 @@
 -- 1. Création de la table pour stocker les couleurs
 CREATE TABLE IF NOT EXISTS kanban_colors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    color_nouveau VARCHAR(20) NOT NULL DEFAULT '#1035ef',
+    color_nouveau VARCHAR(20) NOT NULL DEFAULT '#ea3e09',
     color_encours VARCHAR(20) NOT NULL DEFAULT '#bae1ff',
     color_termine VARCHAR(20) NOT NULL DEFAULT '#baffc9'
 );
 
 -- 2. Insertion des couleurs par défaut (avec gestion du conflit si l'ID 1 existe déjà)
 INSERT INTO kanban_colors (id, color_nouveau, color_encours, color_termine) 
-VALUES (1, '#0ae42b', '#bae1ff', '#baffc9')
+VALUES (1, '#f92f0c', '#bae1ff', '#baffc9')
 ON CONFLICT(id) DO UPDATE SET 
     color_nouveau = excluded.color_nouveau,
     color_encours = excluded.color_encours,
@@ -24,11 +24,11 @@ CREATE TABLE IF NOT EXISTS status_translation (
 );
 
 -- Insertion des données (Français)
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (1, '[1]', 'fr', 'Nouveau');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (2, '[2, 3]', 'fr', 'En cours');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (3, '[5]', 'fr', 'Terminé');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (1, '[1]', 'fr', 'Nouveau');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (2, '[2, 3]', 'fr', 'En cours');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (3, '[6]', 'fr', 'Terminé');
 
 -- Insertion des données (Malgache)
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (4, '[1]', 'mlg', 'Vaovao');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (5, '[2, 3]', 'mlg', 'Efa manao');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, '[5]', 'mlg', 'Vita');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (4, '[1]', 'mlg', 'Vaovao');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (5, '[2, 3]', 'mlg', 'Efa manao');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, '[6]', 'mlg', 'Vita');
