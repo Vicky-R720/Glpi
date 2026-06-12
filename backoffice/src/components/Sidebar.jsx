@@ -44,6 +44,7 @@ function Sidebar({ onLogout }) {
                 <a className="nav-link small" href="/computers">🖥️ Ordinateurs</a>
                 <a className="nav-link small" href="/monitors">📺 Écrans & Moniteurs</a>
                 <a className="nav-link small" href="/tickets">🎟️ Tickets & Incidents</a>
+                <a className="nav-link small" href="/items-cost">💰 Coût des Équipements</a>
               </div>
             )}
           </nav>

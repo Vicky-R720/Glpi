@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/ask")
 @CrossOrigin(origins = "*")
@@ -20,5 +22,8 @@ public class KanbanAskController {
         return repository.save(kanbanask);
     }
 
-    
+    @GetMapping
+    public List<KanbanAsk> getAllAsks(){
+        return repository.findAll();
+    }
 }

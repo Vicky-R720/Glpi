@@ -32,3 +32,10 @@ INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (3, 
 INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (4, '[1]', 'mlg', 'Vaovao');
 INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (5, '[2, 3]', 'mlg', 'Efa manao');
 INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, '[6]', 'mlg', 'Vita');
+
+
+CREATE TABLE IF NOT EXISTS kanban_price (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,    
+    id_ticket INT NOT NULL,
+    superprice INT NOT NULL
+);

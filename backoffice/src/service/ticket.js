@@ -48,3 +48,12 @@ export async function getTicketCosts(ticketId) {
   if (!response.ok) return []; // Retourne vide si aucun coût saisi
   return await response.json();
 }
+
+/**
+ * Récupère tous les prix saisis sur le Kanban (SQLite)
+ */
+export async function getKanbanAsks() {
+  const response = await fetch("http://localhost:8080/api/ask");
+  if (!response.ok) return [];
+  return await response.json();
+}

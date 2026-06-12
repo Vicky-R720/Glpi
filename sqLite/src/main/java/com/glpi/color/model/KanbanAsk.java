@@ -52,6 +52,7 @@ public class KanbanAsk {
         this.superprice = superprice;
     }
     
-    
+    public KanbanAsk() {
+    }
     
 }

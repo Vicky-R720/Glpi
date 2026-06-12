@@ -10,6 +10,7 @@ import Dashboard from './page/Dashboard.jsx'
 import Reset from './page/Reset.jsx'
 import LoginPage from './page/LoginPage.jsx'
 import Tickets from './page/Tickets.jsx'
+import ItemsCost from './page/ItemsCost.jsx'
 import { AuthProvider, useAuth } from './service/AuthContext.jsx'
 import ImportPage from './page/ImportPage.jsx'
 
@@ -37,6 +38,7 @@ export function RootRouter() {
             <Route path="/computers" element={<Navigate to="/accueil" replace />} />
             <Route path="/monitors" element={<Navigate to="/accueil" replace />} />
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/items-cost" element={<ItemsCost />} />
             <Route path="*" element={<Navigate to="/accueil" replace />} />
             <Route path="/accueil" element={<Dashboard />} />
             <Route path="/import" element={<ImportPage />} />
