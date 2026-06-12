@@ -1,7 +1,10 @@
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\controller\KanbanLangController.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\repository\KanbanLangRepository.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\model\KanbanColor.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\model\KanbanLanguage.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\controller\KanbanColorController.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\repository\KanbanColorRepository.java
-D:\eval2026Doc\Glpi\sqLite\src\main\java\com\glpi\color\KanbanColorApplication.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\repository\KanbanColorRepository.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\model\KanbanColor.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\controller\KanbanAskController.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\KanbanColorApplication.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\model\KanbanLanguage.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\controller\KanbanColorController.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\controller\KanbanLangController.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\repository\KanbanLangRepository.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\repository\KanbanAskRepository.java
+C:\Users\aina\Desktop\S6\MR_ROJO\EVALUATION_SERIE2\New_App_glpi\Glpi\sqLite\src\main\java\com\glpi\color\model\KanbanAsk.java

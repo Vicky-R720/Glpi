@@ -24,11 +24,18 @@ CREATE TABLE IF NOT EXISTS status_translation (
 );
 
 -- Insertion des données (Français)
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (1, '[1]', 'fr', 'Nouveau');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (2, '[2, 3]', 'fr', 'En cours');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (3, '[5]', 'fr', 'Terminé');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (1, '[1]', 'fr', 'Nouveau');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (2, '[2, 3]', 'fr', 'En cours');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (3, '[6]', 'fr', 'Terminé');
 
 -- Insertion des données (Malgache)
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (4, '[1]', 'mlg', 'Vaovao');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (5, '[2, 3]', 'mlg', 'Efa manao');
-INSERT OR IGNORE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, '[5]', 'mlg', 'Vita');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (4, '[1]', 'mlg', 'Vaovao');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (5, '[2, 3]', 'mlg', 'Efa manao');
+INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, '[6]', 'mlg', 'Vita');
+
+
+CREATE TABLE IF NOT EXISTS kanban_price (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,    
+    id_ticket INT NOT NULL,
+    superprice INT NOT NULL
+);

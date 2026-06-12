@@ -18,6 +18,11 @@ export default function Ticket() {
     const [draggedTicketId, setDraggedTicketId] = useState(null);
     const [lang, setLang] = useState([]);
 
+    const [isSupperpriceModalOpen , setIsSupperpriceModalOpen] = useState(false);
+    const [superpriceValue , setSuperpriceValue] = useState("");
+    const [pendingDropTicketId , setPendingDropTicketId] = useState(null);
+    const [pendingDropStatusId, setPendingDropStatusId] = useState(null)
+
     // Color states from Spring Boot SQLite DB
     const [columnColors, setColumnColors] = useState({
         colorNouveau: '#ffb3ba',
@@ -176,6 +181,12 @@ export default function Ticket() {
         e.preventDefault();
         if (!draggedTicketId) return;
 
+        if(targetStatusId === 6 ){
+            setPendingDropTicketId(draggedTicketId);
+            setPendingDropStatusId(targetStatusId);
+            setIsSupperpriceModalOpen(true);
+            return;
+        }
         // 1. Mise à jour "Optimiste" de l'interface (pour que ça soit instantané visuellement)
         const originalTickets = [...tickets];
         setTickets(tickets.map(ticket =>
@@ -192,6 +203,44 @@ export default function Ticket() {
             alert("Impossible de changer le statut du ticket.");
         } finally {
             setDraggedTicketId(null);
+        }
+    };
+    const submitSuperprice = async () => {
+        if(!pendingDropTicketId || !superpriceValue){
+            alert("il faut entrer le superprice");
+            return ;
+        }
+        try{
+            const response = await fetch("http://localhost:8080/api/ask", {
+                method: "POST" ,
+                headers: {"Content-Type" : "application/json"},
+                body:JSON.stringify({
+                    id_ticket: pendingDropTicketId,
+                    superprice : superpriceValue
+                })
+            });
+            if(!response.ok){
+                console.error("tsy mety ohhh")
+            }
+        } catch (error){
+            console.error("tsy mety ohhh:", error)
+        }
+        const originalTickets = [...tickets];
+        setTickets(tickets.map(ticket => 
+            ticket.id === pendingDropTicketId ? {...ticket, status: pendingDropStatusId} : ticket
+        ));
+        try{
+            await updateTicketStatus(pendingDropTicketId, pendingDropStatusId);
+        } catch (error){
+            console.error("tsy mety ohhh", error)
+            setTickets(originalTickets);
+            alert("tsy mety oa");
+        } finally {
+            setDraggedTicketId(null);
+            setPendingDropTicketId(null);
+            setPendingDropStatusId(null);
+            setSuperpriceValue("");
+            setIsSupperpriceModalOpen(false);
         }
     };
 
@@ -364,6 +413,30 @@ export default function Ticket() {
                         ) : (
                             <p>Erreur lors du chargement des détails.</p>
                         )}
+
+                    </div>
+                </div>
+            )}
+
+            {isSupperpriceModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsSupperpriceModalOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="close-btn" onClick={() => setIsSupperpriceModalOpen(false)}>&Stimes;</button>
+                        <h2>superprice</h2>
+                        <input 
+                            type="number" 
+                            className="form-control"
+                            placeholder="montant"
+                            value={superpriceValue}
+                            onChange={(e) => setSuperpriceValue(e.target.value)}   // ← onChange, pas onCharge
+                        />
+                        
+
+                        <button
+                        className="btn"
+                        onClick={submitSuperprice}>
+                            valider
+                        </button>
                     </div>
                 </div>
             )}
