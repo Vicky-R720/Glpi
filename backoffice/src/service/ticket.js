@@ -57,3 +57,9 @@ export async function getKanbanAsks() {
   if (!response.ok) return [];
   return await response.json();
 }
+
+export async function getKanbanReo() {
+  const response = await fetch("http://localhost:8080/api/reo");
+  if (!response.ok) return [];
+  return await response.json();
+}

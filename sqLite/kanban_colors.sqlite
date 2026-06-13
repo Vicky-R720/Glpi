@@ -37,5 +37,17 @@ INSERT OR REPLACE INTO status_translation (id, glpi_ids, lang, name) VALUES (6, 
 CREATE TABLE IF NOT EXISTS kanban_price (
     id INTEGER PRIMARY KEY AUTOINCREMENT,    
     id_ticket INT NOT NULL,
-    superprice INT NOT NULL
+    type_saisi VARCHAR(255) NOT NULL,
+    cout_saisi REAL NOT NULL,
+    cout_glpi REAL NOT NULL,
+    id_item VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    groupe TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kanban_reo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,    
+    id_ticket INT NOT NULL,
+    reo DECIMAL(10,10) NOT NULL
+
 );

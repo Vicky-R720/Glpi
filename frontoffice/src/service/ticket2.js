@@ -77,4 +77,11 @@ export async function getLang(Lang) {
     return await response.json();
 }
 
+export async function getLastPrice(id){
+    const response = await fetch(`http://localhost:8080/api/ask/price/${id}`);
+    if (!response.ok) throw new Error("Impossible de charger le dernier prix");
+    return await response.json();
+
+}
+
 

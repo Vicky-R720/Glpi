@@ -1,4 +1,10 @@
-com\glpi\color\controller\KanbanColorController.class
+com\glpi\color\repository\KanbanAskRepository.class
+com\glpi\color\controller\KanbanAskController.class
 com\glpi\color\KanbanColorApplication.class
+com\glpi\color\repository\KanbanLangRepository.class
+com\glpi\color\controller\KanbanLangController.class
+com\glpi\color\controller\KanbanColorController.class
 com\glpi\color\repository\KanbanColorRepository.class
 com\glpi\color\model\KanbanColor.class
+com\glpi\color\model\KanbanAsk.class
+com\glpi\color\model\KanbanLanguage.class

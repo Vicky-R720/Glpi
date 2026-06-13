@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar.jsx";
-import { getTicketsList, getTicketLinkedItems, getTicketCosts, getKanbanAsks } from "../service/ticket.js";
+import { getKanbanAsks, getTicketsList, getTicketLinkedItems, getTicketCosts } from "../service/ticket.js";
 
 export default function ItemsCost() {
     const [loading, setLoading] = useState(true);
@@ -10,155 +10,179 @@ export default function ItemsCost() {
         totalItems: 0,
         totalCost: 0,
         totalGlpi: 0,
-        totalKanban: 0
+        totalSuperprice: 0,
+        totalReo: 0
     });
     const [searchQuery, setSearchQuery] = useState("");
     const [expandedItemKey, setExpandedItemKey] = useState(null);
 
-    useEffect(() => {
-        async function loadAndComputeCosts() {
-            try {
-                setLoading(true);
-                // 1. Charger les tickets et les superprices
-                const [tickets, asks] = await Promise.all([
-                    getTicketsList(),
-                    getKanbanAsks()
-                ]);
+    const loadAndComputeCosts = useCallback(async () => {
+        try {
+            setLoading(true);
+            const asks = await getKanbanAsks();
 
-                // 2. Pour chaque ticket, charger les items associés et les coûts associés en parallèle
-                const ticketsWithDetails = await Promise.all(
-                    tickets.map(async (ticket) => {
-                        try {
-                            const [linkedItems, costs] = await Promise.all([
-                                getTicketLinkedItems(ticket.id),
-                                getTicketCosts(ticket.id)
-                            ]);
-                            return { ...ticket, linkedItems, costs };
-                        } catch (err) {
-                            console.error(`Erreur pour le ticket #${ticket.id}:`, err);
-                            return { ...ticket, linkedItems: [], costs: [] };
-                        }
-                    })
-                );
+            const groupsMap = {};
+            
+            let totalCostSum = 0;
+            let totalGlpiSum = 0;
+            let totalSuperpriceSum = 0;
+            let totalReoSum = 0;
+            let totalItemsSum = 0;
 
-                // 3. Calculer les coûts par ticket et les attribuer aux types d'items
-                const groupsMap = {};
-                
-                // Mapper les superprices par ID de ticket pour un accès rapide
-                const askMap = {};
-                asks.forEach(ask => {
-                    const tid = parseInt(ask.id_ticket || ask.ticketId, 10);
-                    if (tid) {
-                        const price = parseFloat(ask.superprice || 0);
-                        askMap[tid] = (askMap[tid] || 0) + price;
-                    }
+            asks.forEach(ask => {
+                const groupKey = ask.category || "Non catégorisé";
+                if (!groupsMap[groupKey]) {
+                    groupsMap[groupKey] = {
+                        key: groupKey,
+                        itemtype: groupKey,
+                        unique_items_set: new Set(),
+                        tickets: [],
+                        total_glpi: 0,
+                        total_superprice: 0,
+                        total_reo: 0,
+                        total_cost: 0
+                    };
+                }
+
+                const glpiShare = parseFloat(ask.cout_glpi) || 0;
+                const coutSaisi = parseFloat(ask.cout_saisi) || 0;
+                const typeSaisi = ask.type_saisi || "super_price";
+                const isSuperPrice = typeSaisi === "super_price";
+
+                groupsMap[groupKey].unique_items_set.add(ask.id_item);
+
+                // Ne compter cout_glpi qu'une seule fois par ticket+item
+                const glpiKey = ask.id_ticket + "_" + ask.id_item;
+                if (!groupsMap[groupKey].glpi_counted) {
+                    groupsMap[groupKey].glpi_counted = new Set();
+                }
+                let glpiToAdd = 0;
+                if (!groupsMap[groupKey].glpi_counted.has(glpiKey)) {
+                    groupsMap[groupKey].glpi_counted.add(glpiKey);
+                    groupsMap[groupKey].total_glpi += glpiShare;
+                    glpiToAdd = glpiShare;
+                }
+
+                if (isSuperPrice) {
+                    groupsMap[groupKey].total_superprice += coutSaisi;
+                } else {
+                    groupsMap[groupKey].total_reo += coutSaisi;
+                }
+                groupsMap[groupKey].total_cost += glpiToAdd + coutSaisi;
+
+                groupsMap[groupKey].tickets.push({
+                    id_ticket: ask.id_ticket,
+                    id_item: ask.id_item,
+                    type_saisi: typeSaisi,
+                    glpi_share: glpiShare,
+                    cout_saisi: coutSaisi,
+                    total_share: glpiShare + coutSaisi
                 });
+            });
 
-                ticketsWithDetails.forEach((ticket) => {
-                    // Calculer le coût GLPI pour ce ticket
-                    // Formule : actiontime (converti en heure) * cost_time + cost_fixed + cost_material
-                    let glpiCost = 0;
-                    if (Array.isArray(ticket.costs)) {
-                        ticket.costs.forEach(cost => {
-                            const timeHrs = cost.actiontime ? (parseFloat(cost.actiontime) / 3600.0) : 0;
-                            const hourlyRate = parseFloat(cost.cost_time || 0);
-                            const fixedCost = parseFloat(cost.cost_fixed || 0);
-                            const materialCost = parseFloat(cost.cost_material || 0);
-                            glpiCost += (timeHrs * hourlyRate) + fixedCost + materialCost;
-                        });
-                    }
+            const computedGroups = Object.values(groupsMap).map(group => {
+                const uniqueCount = group.unique_items_set.size;
+                totalCostSum += group.total_cost;
+                totalGlpiSum += group.total_glpi;
+                totalSuperpriceSum += group.total_superprice;
+                totalReoSum += group.total_reo;
+                totalItemsSum += uniqueCount;
 
-                    // Calculer le coût Kanban (superprice) pour ce ticket
-                    const kanbanCost = askMap[ticket.id] || 0;
-
-                    // Nombre d'items associés à ce ticket
-                    const linked = ticket.linkedItems || [];
-                    const N = linked.length;
-
-                    if (N > 0) {
-                        const glpiShare = glpiCost / N;
-                        const kanbanShare = kanbanCost / N;
-                        const totalShare = (glpiCost + kanbanCost) / N;
-
-                        linked.forEach(item => {
-                            const groupKey = item.itemtype;
-                            if (!groupsMap[groupKey]) {
-                                groupsMap[groupKey] = {
-                                    key: groupKey,
-                                    itemtype: groupKey,
-                                    unique_items_set: new Set(),
-                                    tickets: [],
-                                    total_glpi: 0,
-                                    total_kanban: 0,
-                                    total_cost: 0
-                                };
-                            }
-
-                            groupsMap[groupKey].unique_items_set.add(item.items_id);
-                            groupsMap[groupKey].total_glpi += glpiShare;
-                            groupsMap[groupKey].total_kanban += kanbanShare;
-                            groupsMap[groupKey].total_cost += totalShare;
-
-                            let existingTicket = groupsMap[groupKey].tickets.find(t => t.id === ticket.id);
-                            if (existingTicket) {
-                                existingTicket.glpi_share += glpiShare;
-                                existingTicket.kanban_share += kanbanShare;
-                                existingTicket.total_share += totalShare;
-                                existingTicket.items_of_this_type_count += 1;
-                            } else {
-                                groupsMap[groupKey].tickets.push({
-                                    id: ticket.id,
-                                    name: ticket.name,
-                                    status: ticket.status,
-                                    total_items: N,
-                                    glpi_cost: glpiCost,
-                                    kanban_cost: kanbanCost,
-                                    glpi_share: glpiShare,
-                                    kanban_share: kanbanShare,
-                                    total_share: totalShare,
-                                    items_of_this_type_count: 1
-                                });
-                            }
-                        });
-                    }
-                });
-
-                const computedGroups = Object.values(groupsMap).map(group => ({
+                return {
                     ...group,
-                    unique_items: group.unique_items_set.size
-                }));
-                
-                // Calculer les métriques globales
-                let totalCostSum = 0;
-                let totalGlpiSum = 0;
-                let totalKanbanSum = 0;
-                let totalItemsSum = 0;
+                    unique_items: uniqueCount
+                };
+            });
 
-                computedGroups.forEach(group => {
-                    totalCostSum += group.total_cost;
-                    totalGlpiSum += group.total_glpi;
-                    totalKanbanSum += group.total_kanban;
-                    totalItemsSum += group.unique_items;
-                });
+            setItemsList(computedGroups);
+            setMetrics({
+                totalItems: totalItemsSum,
+                totalCost: totalCostSum,
+                totalGlpi: totalGlpiSum,
+                totalSuperprice: totalSuperpriceSum,
+                totalReo: totalReoSum
+            });
 
-                setItemsList(computedGroups);
-                setMetrics({
-                    totalItems: totalItemsSum,
-                    totalCost: totalCostSum,
-                    totalGlpi: totalGlpiSum,
-                    totalKanban: totalKanbanSum
-                });
-
-            } catch (err) {
-                console.error("Erreur de calcul des coûts des items:", err);
-                setError("Impossible de charger les données de coût des items.");
-            } finally {
-                setLoading(false);
-            }
+        } catch (err) {
+            console.error("Erreur de calcul des coûts des items:", err);
+            setError("Impossible de charger les données de coût des items depuis SQLite.");
+        } finally {
+            setLoading(false);
         }
-
-        loadAndComputeCosts();
     }, []);
+
+    const handleSync = useCallback(async () => {
+        try {
+            setLoading(true);
+            const tickets = await getTicketsList();
+            const ticketsWithDetails = await Promise.all(
+                tickets.map(async (ticket) => {
+                    try {
+                        const [linkedItems, costs] = await Promise.all([
+                            getTicketLinkedItems(ticket.id),
+                            getTicketCosts(ticket.id)
+                        ]);
+                        return { ...ticket, linkedItems, costs };
+                    } catch (err) {
+                        console.error(`Erreur pour le ticket #${ticket.id}:`, err);
+                        return { ...ticket, linkedItems: [], costs: [] };
+                    }
+                })
+            );
+
+            const syncPayload = [];
+            ticketsWithDetails.forEach((ticket) => {
+                let glpiCost = 0;
+                if (Array.isArray(ticket.costs)) {
+                    ticket.costs.forEach(cost => {
+                        const timeHrs = cost.actiontime ? (parseFloat(cost.actiontime) / 3600.0) : 0;
+                        const hourlyRate = parseFloat(cost.cost_time || 0);
+                        const fixedCost = parseFloat(cost.cost_fixed || 0);
+                        const materialCost = parseFloat(cost.cost_material || 0);
+                        glpiCost += (timeHrs * hourlyRate) + fixedCost + materialCost;
+                    });
+                }
+                const linked = ticket.linkedItems || [];
+                const N = linked.length > 0 ? linked.length : 1;
+                const glpiShare = glpiCost / N;
+
+                if (linked.length > 0) {
+                    linked.forEach(item => {
+                        syncPayload.push({
+                            id_ticket: ticket.id,
+                            cout_glpi: glpiShare,
+                            id_item: item.items_id,
+                            category: item.itemtype
+                        });
+                    });
+                } else {
+                    syncPayload.push({
+                        id_ticket: ticket.id,
+                        cout_glpi: glpiCost,
+                        id_item: 0,
+                        category: "Non catégorisé"
+                    });
+                }
+            });
+
+            await fetch("http://localhost:8080/api/ask/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(syncPayload)
+            });
+
+            await loadAndComputeCosts();
+
+        } catch (error) {
+            console.error("Erreur de synchronisation GLPI vers SQLite:", error);
+            setError("Impossible de synchroniser avec GLPI.");
+            setLoading(false);
+        }
+    }, [loadAndComputeCosts]);
+
+    useEffect(() => {
+        handleSync();
+    }, [handleSync]);
 
     // Filtrer les items par recherche
     const filteredItems = itemsList.filter(item => {
@@ -174,19 +198,6 @@ export default function ItemsCost() {
         }
     };
 
-    const getStatusBadge = (statusId) => {
-        const id = parseInt(statusId, 10);
-        switch (id) {
-            case 1: return <span className="badge bg-danger">Nouveau</span>;
-            case 2:
-            case 3: return <span className="badge bg-warning text-dark">En cours</span>;
-            case 4: return <span className="badge bg-secondary">En attente</span>;
-            case 5: return <span className="badge bg-info text-dark">Résolu</span>;
-            case 6: return <span className="badge bg-success">Clos</span>;
-            default: return <span className="badge bg-light text-dark">Statut {statusId}</span>;
-        }
-    };
-
     return (
         <div className="app-shell">
             <Sidebar />
@@ -194,14 +205,14 @@ export default function ItemsCost() {
             <div className="main">
                 <header className="topbar px-4 py-3 d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
                     <div>
-                        <h1 className="h4 mb-1">Coût par Équipement</h1>
+                        <h1 className="h4 mb-1">Coût par Équipement (SQLite Kanban)</h1>
                         <p className="text-muted mb-0 small">
-                            Ventilation des coûts financiers (GLPI + Kanban) répartis équitablement par équipement rattaché.
+                            Ventilation des coûts financiers (GLPI + Kanban) à partir de la table consolidée.
                         </p>
                     </div>
                     <div>
-                        <button className="btn btn-primary" onClick={() => window.location.reload()}>
-                            Actualiser
+                        <button className="btn btn-primary" onClick={handleSync} disabled={loading}>
+                            {loading ? "Synchronisation..." : "Synchroniser GLPI"}
                         </button>
                     </div>
                 </header>
@@ -221,35 +232,43 @@ export default function ItemsCost() {
                         <>
                             {/* METRICS CARDS */}
                             <div className="row g-4 mb-4">
-                                <div className="col-md-3">
+                                <div className="col">
                                     <div className="card shadow-sm border-0 p-3 h-100">
                                         <div className="card-body">
-                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Équipements Rattachés</h6>
+                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Équipements Uniques</h6>
                                             <h3 className="card-title fw-bold mb-0 text-dark">{metrics.totalItems}</h3>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-md-3">
-                                    <div className="card shadow-sm border-0 p-3 h-100 bg-light border-start border-primary border-4">
-                                        <div className="card-body">
-                                            <h6 className="card-subtitle text-primary mb-1 small text-uppercase fw-semibold">Coût Total Réparti</h6>
-                                            <h3 className="card-title fw-bold mb-0 text-primary">{metrics.totalCost.toFixed(2)} €</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-3">
+                                <div className="col">
                                     <div className="card shadow-sm border-0 p-3 h-100">
                                         <div className="card-body">
-                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Part Coûts GLPI</h6>
+                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Coûts GLPI</h6>
                                             <h3 className="card-title fw-bold mb-0 text-success">{metrics.totalGlpi.toFixed(2)} €</h3>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-md-3">
+                                <div className="col">
                                     <div className="card shadow-sm border-0 p-3 h-100">
                                         <div className="card-body">
-                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Part Coûts Kanban (SQLite)</h6>
-                                            <h3 className="card-title fw-bold mb-0 text-info">{metrics.totalKanban.toFixed(2)} €</h3>
+                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Total SuperPrice</h6>
+                                            <h3 className="card-title fw-bold mb-0 text-info">{metrics.totalSuperprice.toFixed(2)} €</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="card shadow-sm border-0 p-3 h-100">
+                                        <div className="card-body">
+                                            <h6 className="card-subtitle text-muted mb-1 small text-uppercase fw-semibold">Total Réouverture</h6>
+                                            <h3 className="card-title fw-bold mb-0 text-warning">{metrics.totalReo.toFixed(2)} €</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="card shadow-sm border-0 p-3 h-100 bg-light border-start border-primary border-4">
+                                        <div className="card-body">
+                                            <h6 className="card-subtitle text-primary mb-1 small text-uppercase fw-semibold">Coût Total</h6>
+                                            <h3 className="card-title fw-bold mb-0 text-primary">{metrics.totalCost.toFixed(2)} €</h3>
                                         </div>
                                     </div>
                                 </div>
@@ -279,10 +298,11 @@ export default function ItemsCost() {
                                                 <th style={{ width: '40px' }}></th>
                                                 <th>Type Équipement</th>
                                                 <th className="text-center">Quantité (Unique)</th>
-                                                <th className="text-center">Tickets associés</th>
-                                                <th className="text-end">Coût GLPI (€)</th>
-                                                <th className="text-end">Coût Kanban (SQLite) (€)</th>
-                                                <th className="text-end fw-bold">Coût Total (€)</th>
+                                                <th className="text-center">Interventions</th>
+                                                <th className="text-end">GLPI (€)</th>
+                                                <th className="text-end">SuperPrice (€)</th>
+                                                <th className="text-end">Réouverture (€)</th>
+                                                <th className="text-end fw-bold">Total (€)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -316,14 +336,15 @@ export default function ItemsCost() {
                                                                 </span>
                                                             </td>
                                                             <td className="text-end text-success">{item.total_glpi.toFixed(2)} €</td>
-                                                            <td className="text-end text-info">{item.total_kanban.toFixed(2)} €</td>
+                                                            <td className="text-end text-info">{item.total_superprice.toFixed(2)} €</td>
+                                                            <td className="text-end text-warning">{item.total_reo.toFixed(2)} €</td>
                                                             <td className="text-end fw-bold text-dark">{item.total_cost.toFixed(2)} €</td>
                                                         </tr>
 
                                                         {/* EXPANDED DETAILS */}
                                                         {isExpanded && (
                                                             <tr className="table-light">
-                                                                <td colSpan="7" className="p-3">
+                                                                <td colSpan="8" className="p-3">
                                                                     <div className="bg-white p-3 rounded shadow-sm border">
                                                                         <h6 className="text-secondary fw-bold mb-3 small text-uppercase">
                                                                             Détail des tickets contribuant au coût de ce type
@@ -331,28 +352,30 @@ export default function ItemsCost() {
                                                                         <table className="table table-sm table-bordered mb-0 small">
                                                                             <thead className="table-light">
                                                                                 <tr>
-                                                                                    <th>Ticket</th>
-                                                                                    <th className="text-center">Statut</th>
-                                                                                    <th className="text-center">Nb (Ce Type) / Total liés</th>
-                                                                                    <th className="text-end">Coût Total GLPI</th>
-                                                                                    <th className="text-end">Coût Kanban SQLite</th>
-                                                                                    <th className="text-end fw-bold">Part attribuée à ce type</th>
+                                                                                    <th>Ticket ID</th>
+                                                                                    <th className="text-center">Item ID</th>
+                                                                                    <th className="text-center">Type</th>
+                                                                                    <th className="text-end">GLPI</th>
+                                                                                    <th className="text-end">Coût Saisi</th>
+                                                                                    <th className="text-end fw-bold">Total</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                {item.tickets.map((t) => (
-                                                                                    <tr key={t.id}>
+                                                                                {item.tickets.map((t, idx) => (
+                                                                                    <tr key={idx}>
                                                                                         <td>
-                                                                                            <strong>#{t.id}</strong> - {t.name || 'Sans sujet'}
+                                                                                            <strong>#{t.id_ticket}</strong>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            {getStatusBadge(t.status)}
+                                                                                            {t.id_item}
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            {t.items_of_this_type_count} / {t.total_items}
+                                                                                            <span className={`badge ${t.type_saisi === 'super_price' ? 'bg-info' : 'bg-warning'}`}>
+                                                                                                {t.type_saisi === 'super_price' ? 'SuperPrice' : 'Réouverture'}
+                                                                                            </span>
                                                                                         </td>
-                                                                                        <td className="text-end">{t.glpi_cost.toFixed(2)} €</td>
-                                                                                        <td className="text-end">{t.kanban_cost.toFixed(2)} €</td>
+                                                                                        <td className="text-end text-success">{t.glpi_share.toFixed(2)} €</td>
+                                                                                        <td className="text-end">{t.cout_saisi.toFixed(2)} €</td>
                                                                                         <td className="text-end fw-bold bg-light">
                                                                                             {t.total_share.toFixed(2)} €
                                                                                         </td>
@@ -370,7 +393,7 @@ export default function ItemsCost() {
 
                                             {filteredItems.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="7" className="text-center text-muted py-4">
+                                                    <td colSpan="8" className="text-center text-muted py-4">
                                                         Aucun matériel trouvé correspondant à la recherche.
                                                     </td>
                                                 </tr>

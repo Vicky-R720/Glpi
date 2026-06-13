@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { getLang, getTicketsList, getdetailTicket, getTicketLinkedItems, getTicketCosts, updateTicketStatus, getKanbanColors } from "../service/ticket2.js";
 import "./Ticket.css";
 
@@ -21,7 +21,15 @@ export default function Ticket() {
     const [isSupperpriceModalOpen , setIsSupperpriceModalOpen] = useState(false);
     const [superpriceValue , setSuperpriceValue] = useState("");
     const [pendingDropTicketId , setPendingDropTicketId] = useState(null);
-    const [pendingDropStatusId, setPendingDropStatusId] = useState(null)
+    const [pendingDropStatusId, setPendingDropStatusId] = useState(null);
+
+    const [isReoModalOpen,setIsReo] = useState(false);
+    const [reoValue, setReoValue] = useState("");
+    const [pendingDropTicketId2 , setPendingDropTicketId2] = useState(null);
+    const [pendingDropStatusId2, setPendingDropStatusId2] = useState(null);
+
+
+
 
     // Color states from Spring Boot SQLite DB
     const [columnColors, setColumnColors] = useState({
@@ -187,6 +195,19 @@ export default function Ticket() {
             setIsSupperpriceModalOpen(true);
             return;
         }
+        const draggedTickett = tickets.find(t => t.id === draggedTicketId);
+        const currentStatusId = draggedTickett ? draggedTickett.status : null;
+        if ((targetStatusId === 2 || targetStatusId === 3) && currentStatusId === 6) {
+            setPendingDropTicketId2(draggedTickett);
+            setPendingDropStatusId2(targetStatusId);
+            setIsReo(true);
+        }
+
+        
+
+        const draggedTicket = tickets.find(t => t.id === draggedTicketId);
+        
+
         // 1. Mise à jour "Optimiste" de l'interface (pour que ça soit instantané visuellement)
         const originalTickets = [...tickets];
         setTickets(tickets.map(ticket =>
@@ -210,21 +231,110 @@ export default function Ticket() {
             alert("il faut entrer le superprice");
             return ;
         }
-        try{
-            const response = await fetch("http://localhost:8080/api/ask", {
-                method: "POST" ,
-                headers: {"Content-Type" : "application/json"},
-                body:JSON.stringify({
-                    id_ticket: pendingDropTicketId,
-                    superprice : superpriceValue
-                })
-            });
-            if(!response.ok){
-                console.error("tsy mety ohhh")
+
+        console.log("=== submitSuperprice START ===");
+        console.log("pendingDropTicketId:", pendingDropTicketId);
+        console.log("superpriceValue:", superpriceValue);
+
+        const coutSaisiNum = parseFloat(superpriceValue) || 0;
+        let linkedItems = [];
+        let glpiCost = 0;
+
+        // Step 1: Try to fetch GLPI data (non-blocking - if it fails, we still insert)
+        try {
+            console.log("Fetching GLPI linked items and costs...");
+            const [items, costs] = await Promise.all([
+                getTicketLinkedItems(pendingDropTicketId),
+                getTicketCosts(pendingDropTicketId)
+            ]);
+            linkedItems = items || [];
+            console.log("linkedItems:", JSON.stringify(linkedItems));
+            console.log("costs:", JSON.stringify(costs));
+
+            if (Array.isArray(costs)) {
+                costs.forEach(cost => {
+                    const timeHrs = cost.actiontime ? (parseFloat(cost.actiontime) / 3600.0) : 0;
+                    const hourlyRate = parseFloat(cost.cost_time || 0);
+                    const fixedCost = parseFloat(cost.cost_fixed || 0);
+                    const materialCost = parseFloat(cost.cost_material || 0);
+                    glpiCost += (timeHrs * hourlyRate) + fixedCost + materialCost;
+                });
             }
-        } catch (error){
-            console.error("tsy mety ohhh:", error)
+            console.log("Calculated glpiCost:", glpiCost);
+        } catch (glpiError) {
+            console.warn("GLPI API failed (continuing with defaults):", glpiError);
+            linkedItems = [];
+            glpiCost = 0;
         }
+
+        // Step 2: Build payloads and POST to SQLite backend
+        const N = linkedItems.length > 0 ? linkedItems.length : 1;
+        const glpiShare = glpiCost / N;
+        const kanbanShare = coutSaisiNum / N;
+        let insertSuccess = false;
+        const groupee = new Date().toISOString();
+
+        try {
+            if (linkedItems.length > 0) {
+                console.log("Inserting " + linkedItems.length + " records (one per linked item)...");
+                for (const item of linkedItems) {
+                    const payload = {
+                        id_ticket: pendingDropTicketId,
+                        cout_saisi: kanbanShare,
+                        cout_glpi: glpiShare,
+                        id_item: item.items_id,
+                        category: item.itemtype || "Non catégorisé",
+                        groupe: groupee,
+                        type_saisi: "super_price"
+                    };
+                    console.log("POST payload:", JSON.stringify(payload));
+                    const response = await fetch("http://localhost:8080/api/ask", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(payload)
+                    });
+                    const responseText = await response.text();
+                    console.log("Response status:", response.status, "body:", responseText);
+                    if (!response.ok) {
+                        alert("Erreur insertion (status " + response.status + "): " + responseText);
+                    } else {
+                        insertSuccess = true;
+                    }
+                }
+            } else {
+                // No linked items - insert a single record
+                const payload = {
+                    id_ticket: pendingDropTicketId,
+                    cout_saisi: coutSaisiNum,
+                    cout_glpi: glpiCost,
+                    id_item: "0",
+                    category: "Non catégorisé",
+                    groupe: "0"
+                };
+                console.log("POST payload (no linked items):", JSON.stringify(payload));
+                const response = await fetch("http://localhost:8080/api/ask", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+                const responseText = await response.text();
+                console.log("Response status:", response.status, "body:", responseText);
+                if (!response.ok) {
+                    alert("Erreur insertion (status " + response.status + "): " + responseText);
+                } else {
+                    insertSuccess = true;
+                }
+            }
+        } catch (fetchError) {
+            console.error("Fetch to /api/ask failed:", fetchError);
+            alert("Impossible de contacter le backend Spring Boot (localhost:8080). Vérifiez qu'il est démarré.\n\nErreur: " + fetchError.message);
+        }
+
+        if (insertSuccess) {
+            console.log("=== INSERT SUCCESS ===");
+        }
+
+        // Step 3: Update ticket status in GLPI
         const originalTickets = [...tickets];
         setTickets(tickets.map(ticket => 
             ticket.id === pendingDropTicketId ? {...ticket, status: pendingDropStatusId} : ticket
@@ -232,9 +342,9 @@ export default function Ticket() {
         try{
             await updateTicketStatus(pendingDropTicketId, pendingDropStatusId);
         } catch (error){
-            console.error("tsy mety ohhh", error)
+            console.error("Status update failed:", error)
             setTickets(originalTickets);
-            alert("tsy mety oa");
+            alert("Impossible de changer le statut du ticket.");
         } finally {
             setDraggedTicketId(null);
             setPendingDropTicketId(null);
@@ -243,6 +353,195 @@ export default function Ticket() {
             setIsSupperpriceModalOpen(false);
         }
     };
+
+
+    const submitReo = async () => {
+        if(!pendingDropTicketId2){
+            alert("il faut entrer le superprice");
+            return ;
+        }
+
+        console.log("=== Delete START ===");
+        console.log("pendingDropTicketId2:", pendingDropTicketId2);
+        
+        let insertSuccess = false;
+
+        try {
+            
+                console.log("Inserting " + linkedItems.length + " records (one per linked item)...");
+                const response = await fetch("http://localhost:8080/api/ask/ticket/" + pendingDropTicketId2.id, {
+                        method: "DELETE",
+                    });
+        } catch (fetchError) {
+            console.error("Fetch to /api/ask failed:", fetchError);
+            alert("Impossible de contacter le backend Spring Boot (localhost:8080). Vérifiez qu'il est démarré.\n\nErreur: " + fetchError.message);
+        }
+
+        if (insertSuccess) {
+            console.log("=== INSERT SUCCESS ===");
+        }
+
+        // Step 3: Update ticket status in GLPI
+        const originalTickets = [...tickets];
+        setTickets(tickets.map(ticket => 
+            ticket.id === pendingDropTicketId2 ? {...ticket, status: pendingDropStatusId2} : ticket
+        ));
+        try{
+            await updateTicketStatus(pendingDropTicketId2.id, pendingDropStatusId2);
+        } catch (error){
+            console.error("Status update failed:", error)
+            setTickets(originalTickets);
+            alert("Impossible de changer le statut du ticket.");
+        } finally {
+            setDraggedTicketId(null);
+            setPendingDropTicketId2(null);
+            setPendingDropStatusId2(null);
+            setIsReo(false);
+        }
+    };
+
+
+    const submitReo2 = async () => {
+        if(!pendingDropTicketId2 || !reoValue){
+            alert("il faut entrer le pourcentage");
+            return ;
+        }
+
+        console.log("=== submitPourcentage START ===");
+        console.log("pendingDropTicketId2:", pendingDropTicketId2);
+        console.log("reoValue:", reoValue);
+
+        const coutSaisiNum = parseFloat(reoValue) || 0;
+        let linkedItems = [];
+        let glpiCost = 0;
+
+        // Step 1: Try to fetch GLPI data (non-blocking - if it fails, we still insert)
+        try {
+            console.log("Fetching GLPI linked items and costs...");
+            const [items, costs] = await Promise.all([
+                getTicketLinkedItems(pendingDropTicketId2.id),
+                getTicketCosts(pendingDropTicketId2.id)
+            ]);
+            linkedItems = items || [];
+            console.log("linkedItems:", JSON.stringify(linkedItems));
+            console.log("costs:", JSON.stringify(costs));
+
+            if (Array.isArray(costs)) {
+                costs.forEach(cost => {
+                    const timeHrs = cost.actiontime ? (parseFloat(cost.actiontime) / 3600.0) : 0;
+                    const hourlyRate = parseFloat(cost.cost_time || 0);
+                    const fixedCost = parseFloat(cost.cost_fixed || 0);
+                    const materialCost = parseFloat(cost.cost_material || 0);
+                    glpiCost += (timeHrs * hourlyRate) + fixedCost + materialCost;
+                });
+            }
+            console.log("Calculated glpiCost:", glpiCost);
+        } catch (glpiError) {
+            console.warn("GLPI API failed (continuing with defaults):", glpiError);
+            linkedItems = [];
+            glpiCost = 0;
+        }
+
+        // Step 2: Get the last cout_saisi for this ticket from SQLite
+        const N = linkedItems.length > 0 ? linkedItems.length : 1;
+        const glpiShare = glpiCost / N;
+        
+        let insertSuccess = false;
+        const groupee = new Date().toISOString();
+
+        // Fetch last super_price from backend
+        let lastprice = 0;
+        try {
+            const priceResp = await fetch("http://localhost:8080/api/ask/price/" + pendingDropTicketId2.id);
+            lastprice = await priceResp.json();
+            console.log("lastprice for ticket:", lastprice);
+        } catch (e) {
+            console.warn("Could not fetch last price:", e);
+        }
+
+        const kanbanShare = coutSaisiNum * lastprice / 100;
+
+        try {
+            if (linkedItems.length > 0) {
+                console.log("Inserting " + linkedItems.length + " records (one per linked item)...");
+                for (const item of linkedItems) {
+                    const payload = {
+                        id_ticket: pendingDropTicketId2.id,
+                        cout_saisi: kanbanShare,
+                        cout_glpi: glpiShare,
+                        id_item: item.items_id,
+                        category: item.itemtype || "Non catégorisé",
+                        groupe: groupee,
+                        type_saisi: "Reo"
+                    };
+                    console.log("POST payload:", JSON.stringify(payload));
+                    const response = await fetch("http://localhost:8080/api/ask", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(payload)
+                    });
+                    const responseText = await response.text();
+                    console.log("Response status:", response.status, "body:", responseText);
+                    if (!response.ok) {
+                        alert("Erreur insertion (status " + response.status + "): " + responseText);
+                    } else {
+                        insertSuccess = true;
+                    }
+                }
+            } else {
+                // No linked items - insert a single record
+                const payload = {
+                    id_ticket: pendingDropTicketId2.id,
+                    cout_saisi: kanbanShare,
+                    cout_glpi: glpiCost,
+                    id_item: "0",
+                    category: "Non catégorisé",
+                    groupe: groupee
+                };
+                console.log("POST payload (no linked items):", JSON.stringify(payload));
+                const response = await fetch("http://localhost:8080/api/ask", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+                const responseText = await response.text();
+                console.log("Response status:", response.status, "body:", responseText);
+                if (!response.ok) {
+                    alert("Erreur insertion (status " + response.status + "): " + responseText);
+                } else {
+                    insertSuccess = true;
+                }
+            }
+        } catch (fetchError) {
+            console.error("Fetch to /api/ask failed:", fetchError);
+            alert("Impossible de contacter le backend Spring Boot (localhost:8080). Vérifiez qu'il est démarré.\n\nErreur: " + fetchError.message);
+        }
+
+        if (insertSuccess) {
+            console.log("=== INSERT SUCCESS ===");
+        }
+
+        // Step 3: Update ticket status in GLPI
+        const originalTickets = [...tickets];
+        setTickets(tickets.map(ticket => 
+            ticket.id === pendingDropTicketId2.id ? {...ticket, status: pendingDropStatusId2} : ticket
+        ));
+        try{
+            await updateTicketStatus(pendingDropTicketId2.id, pendingDropStatusId2);
+        } catch (error){
+            console.error("Status update failed:", error)
+            setTickets(originalTickets);
+            alert("Impossible de changer le statut du ticket.");
+        } finally {
+            setDraggedTicketId(null);
+            setPendingDropTicketId2(null);
+            setPendingDropStatusId2(null);
+            setReoValue("");
+            setIsReo(false);
+        }
+    };
+
+
 
 
     if (loading) {
@@ -440,6 +739,36 @@ export default function Ticket() {
                     </div>
                 </div>
             )}
+
+            {isReoModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsSupperpriceModalOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="close-btn" onClick={() => setIsReo(false)}>&Stimes;</button>
+                        <h2>reo</h2>
+                        <input 
+                            type="number" 
+                            className="form-control"
+                            placeholder="montant"
+                            value={reoValue}
+                            onChange={(e) => setReoValue(e.target.value)}   // ← onChange, pas onCharge
+                        />
+
+
+                        <button
+                        className="btn"
+                        onClick={submitReo2}>
+                            valider pourcentage 
+                        </button>
+                        <button
+                        className="btn"
+                        onClick={submitReo}>
+                            Delete farany
+                        </button>
+                    </div>
+                </div>
+            )}
+
+
         </div>
     );
 }
