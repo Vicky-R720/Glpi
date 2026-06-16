@@ -4,6 +4,7 @@ import './App.css'
 import Assets from './page/Assets.jsx'
 import DeclareTicket from './page/DeclareTicket.jsx'
 import Ticket from './page/Ticket.jsx'
+import ImportMvt from './page/ImportMvt.jsx'
 
 //tsiory
 const SESSION_TOKEN = import.meta.env.VITE_SESSION_TOKEN;
@@ -277,6 +278,7 @@ export default function App() {
           <Route path="/monitors" element={<Navigate to="/inventory" replace />} />
           <Route path="*" element={<Navigate to="/inventory" replace />} />
           <Route path="/ticket" element={<Ticket />} />
+          <Route path="/import_mvt" element={<ImportMvt />} />
         </Route>
       </Routes>
     </Router>

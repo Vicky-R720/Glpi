@@ -74,9 +74,9 @@ export default function ItemsCost() {
                     id_ticket: ask.id_ticket,
                     id_item: ask.id_item,
                     type_saisi: typeSaisi,
-                    glpi_share: glpiShare,
+                    glpi_share: glpiToAdd,
                     cout_saisi: coutSaisi,
-                    total_share: glpiShare + coutSaisi
+                    total_share: glpiToAdd + coutSaisi
                 });
             });
 
