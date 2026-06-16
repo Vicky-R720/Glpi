@@ -12,6 +12,11 @@ export default function ImportMvt(){
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
 
+  // Manual entry state
+  const [manualTicket, setManualTicket] = useState('');
+  const [manualMvt, setManualMvt] = useState('open');
+  const [manualValeur, setManualValeur] = useState('');
+
   const handleMvtChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setEquipFile(e.target.files[0]);
@@ -119,6 +124,39 @@ export default function ImportMvt(){
       }
     };
 
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    if (!manualTicket || !manualMvt) {
+      setStatus("Veuillez remplir au moins le Ticket et le Mouvement.");
+      return;
+    }
+    
+    setIsLoading(true);
+    setStatus("Début saisie manuelle...");
+    
+    try {
+      const manualData = [{
+        ticket: manualTicket.trim(),
+        mvt: manualMvt.trim(),
+        valeur: manualValeur.trim()
+      }];
+      
+      await processImport(manualData, (msg) => {
+        setStatus(`[Saisie manuelle] ${msg}`);
+      });
+      
+      setStatus("Saisie manuelle terminée avec succès !");
+      
+      setManualTicket('');
+      setManualValeur('');
+    } catch (error) {
+      console.error("Erreur lors de la saisie manuelle:", error);
+      setStatus("Une erreur s'est produite lors de la saisie manuelle.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
     return (
     <div className="import-page" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h1>Import de Données des mouvement</h1>
@@ -189,6 +227,65 @@ export default function ImportMvt(){
           </div>
         </div>
       )}
+
+      <hr style={{ margin: '3rem 0', borderColor: '#eee' }} />
+      
+      <h2>Saisie Manuelle</h2>
+      <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+        Ajoutez une ligne manuellement (utilise la même logique que l'import CSV).
+      </p>
+      <form onSubmit={handleManualSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 'bold' }}>Ticket ID :</label>
+          <input 
+            type="text" 
+            value={manualTicket} 
+            onChange={(e) => setManualTicket(e.target.value)} 
+            placeholder="Ex: 25"
+            style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+          />
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 'bold' }}>Mouvement :</label>
+          <select 
+            value={manualMvt} 
+            onChange={(e) => setManualMvt(e.target.value)}
+            style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+          >
+            <option value="open">open</option>
+            <option value="close">close</option>
+            <option value="cancel">cancel</option>
+          </select>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 'bold' }}>Valeur :</label>
+          <input 
+            type="text" 
+            value={manualValeur} 
+            onChange={(e) => setManualValeur(e.target.value)} 
+            placeholder='Ex: 16,5'
+            style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: isLoading ? '#ccc' : '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            marginTop: '0.5rem'
+          }}
+        >
+          {isLoading ? 'Traitement en cours...' : 'Ajouter manuellement'}
+        </button>
+      </form>
     </div>
   );
 
