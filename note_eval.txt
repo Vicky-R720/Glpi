@@ -1,0 +1,2 @@
+Alea:
+ajouter une colonne moyenne dans la page CoupPage
